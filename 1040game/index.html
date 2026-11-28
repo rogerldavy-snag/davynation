@@ -1,0 +1,1548 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>The 1040 Game</title>
+    <meta name="description" content="Think you can file a real return? Take the desk, meet the clients, build the 1040.">
+    <meta property="og:title" content="The 1040 Game">
+    <meta property="og:description" content="Think you can file a real return? Take the desk, meet the clients, build the 1040.">
+    <meta property="og:url" content="https://davynation.com/1040game">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <style>
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2.75rem; }
+      * { box-sizing: border-box; }
+      :root {
+        color-scheme: light dark;
+        --bg: #e9ede8;
+        --bg-deep: #dfe6dd;
+        --surface: #ffffff;
+        --surface-2: #f2f5f1;
+        --ink: #16211a;
+        --muted: #54645a;
+        --line: #ccd6cc;
+        --accent: #0c7a4b;
+        --accent-dark: #075c38;
+        --accent-soft: #e0f2e7;
+        --amber: #e79b1e;
+        --amber-soft: #fdf0d5;
+        --red: #b3261e;
+        --red-soft: #fbe7e5;
+        --paper: #fffdf3;
+        --paper-ink: #1d261f;
+        --paper-line: #d9d2ba;
+        --shadow: 0 10px 30px rgba(18, 38, 26, 0.10);
+        --radius: 14px;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0f1511;
+          --bg-deep: #0a0f0b;
+          --surface: #1a231c;
+          --surface-2: #222d24;
+          --ink: #edf3ee;
+          --muted: #a3b5a8;
+          --line: #33443a;
+          --accent: #3ec983;
+          --accent-dark: #8fe3b6;
+          --accent-soft: #173527;
+          --amber: #f2b13e;
+          --amber-soft: #3a2d10;
+          --red: #ff8a80;
+          --red-soft: #40201d;
+          --shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+        }
+      }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Nunito", system-ui, sans-serif;
+        font-size: 16.5px;
+        line-height: 1.55;
+      }
+      h1, h2, h3, .display { font-family: "Bricolage Grotesque", "Nunito", sans-serif; line-height: 1.12; margin: 0; }
+      .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+      button { font: inherit; cursor: pointer; }
+      a { color: var(--accent-dark); }
+      :focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; border-radius: 6px; }
+
+      /* ---------- HUD ---------- */
+      .hud {
+        position: sticky; top: 0; z-index: 20;
+        background: var(--surface);
+        border-bottom: 1px solid var(--line);
+      }
+      .hud-in {
+        max-width: 1140px; margin: 0 auto; padding: 10px 16px;
+        display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      }
+      .hud-label { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 0.98rem; letter-spacing: 0.01em; margin-right: 2px; }
+      .hud-label span { color: var(--accent); }
+      .chip {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: var(--surface-2); border: 1px solid var(--line);
+        border-radius: 999px; padding: 5px 12px; font-size: 0.86rem; font-weight: 700;
+        min-height: 2rem;
+      }
+      .chip b { font-family: "IBM Plex Mono", monospace; font-weight: 600; }
+      .chip.gold { background: var(--amber-soft); border-color: var(--amber); }
+      .season-dots { display: inline-flex; gap: 5px; align-items: center; }
+      .season-dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); display: block; }
+      .season-dots i.done { background: var(--accent); }
+      .season-dots i.now { background: var(--amber); box-shadow: 0 0 0 3px var(--amber-soft); }
+      .hud-spacer { flex: 1; }
+      .byline { font-size: 0.8rem; color: var(--muted); font-weight: 700; }
+
+      /* ---------- Layout ---------- */
+      .wrap { max-width: 1140px; margin: 0 auto; padding: 20px 16px 56px; }
+      .board { display: grid; grid-template-columns: 368px 1fr; gap: 18px; grid-template-areas: "aside play"; align-items: start; }
+      aside.col { grid-area: aside; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+      section.play { grid-area: play; min-width: 0; }
+      @media (max-width: 860px) {
+        .board { grid-template-columns: 1fr; grid-template-areas: "play" "aside"; }
+      }
+      .card {
+        background: var(--surface); border: 1px solid var(--line);
+        border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px;
+      }
+
+      /* ---------- Start screen ---------- */
+      .start { max-width: 880px; margin: 8px auto 0; text-align: left; }
+      .start-badge {
+        display: inline-block; background: var(--accent); color: #fff; font-weight: 800;
+        font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase;
+        padding: 6px 14px; border-radius: 999px;
+      }
+      @media (prefers-color-scheme: dark) { .start-badge { color: #0b1510; } }
+      .start h1 { font-size: clamp(2.3rem, 6vw, 3.6rem); font-weight: 800; margin: 16px 0 10px; }
+      .start h1 .hl { color: var(--accent); }
+      .start .lede { font-size: 1.14rem; color: var(--muted); max-width: 620px; margin: 0 0 22px; }
+      .how { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 0 0 22px; }
+      @media (max-width: 700px) { .how { grid-template-columns: 1fr; } }
+      .how-step { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+      .how-step .num {
+        width: 34px; height: 34px; border-radius: 50%; background: var(--amber-soft);
+        border: 1.5px solid var(--amber); color: var(--ink); font-weight: 800;
+        display: flex; align-items: center; justify-content: center; margin-bottom: 8px;
+        font-family: "IBM Plex Mono", monospace;
+      }
+      .how-step h3 { font-size: 1.02rem; margin-bottom: 4px; }
+      .how-step p { margin: 0; font-size: 0.92rem; color: var(--muted); }
+      .states { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 0 0 22px; }
+      @media (max-width: 980px) { .states { grid-template-columns: repeat(2, 1fr); } }
+      @media (max-width: 700px) { .states { grid-template-columns: 1fr; } }
+      .state-card { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--accent); border-radius: 12px; padding: 16px; }
+      .state-card h3 { font-size: 1.02rem; margin-bottom: 4px; }
+      .state-card p { margin: 0; font-size: 0.92rem; color: var(--muted); }
+      .btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        border: none; border-radius: 11px; padding: 13px 26px;
+        font-weight: 800; font-size: 1.02rem; text-decoration: none;
+        background: var(--accent); color: #fff; transition: transform 0.12s ease, background 0.12s ease;
+      }
+      @media (prefers-color-scheme: dark) { .btn { color: #0b1510; } }
+      .btn:hover { background: var(--accent-dark); }
+      @media (prefers-color-scheme: dark) { .btn:hover { background: var(--accent); } }
+      .btn:active { transform: scale(0.98); }
+      .btn.amber { background: var(--amber); color: #221a06; }
+      .btn.amber:hover { background: #d98d12; }
+      .btn.ghost { background: transparent; color: var(--accent-dark); border: 2px solid var(--accent); }
+      .btn.big { font-size: 1.13rem; padding: 16px 32px; }
+      .share-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+      .share-status { font-size: 0.9rem; font-weight: 700; color: var(--accent-dark); }
+      .fineprint { font-size: 0.85rem; color: var(--muted); margin-top: 16px; }
+      .disclaimer {
+        background: var(--amber-soft); border: 1.5px solid var(--amber); border-radius: 12px;
+        padding: 14px 16px; margin: 0 0 22px; font-size: 0.98rem; line-height: 1.5;
+      }
+      .disclaimer b { font-family: "Bricolage Grotesque", sans-serif; }
+      .creator { margin-top: 26px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 0.9rem; color: var(--muted); }
+      .creator b { color: var(--ink); }
+
+      /* ---------- Client card ---------- */
+      .client-head { display: flex; gap: 14px; align-items: center; }
+      .avatar {
+        width: 58px; height: 58px; border-radius: 50%; flex: none;
+        display: flex; align-items: center; justify-content: center;
+        font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 1.25rem; color: #fff;
+      }
+      @media (prefers-color-scheme: dark) { .avatar { color: #0d130e; } }
+      .client-head h2 { font-size: 1.3rem; }
+      .client-tag { color: var(--muted); font-size: 0.9rem; font-weight: 700; }
+      .client-story { margin: 12px 0 0; font-size: 0.96rem; }
+      .fact-list { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+      .fact-list li {
+        background: var(--accent-soft); border-radius: 9px; padding: 9px 12px; font-size: 0.9rem; font-weight: 600;
+        animation: pop 0.25s ease;
+      }
+      .fact-list li::before { content: "Found: "; font-weight: 800; color: var(--accent-dark); }
+      .fact-empty { font-size: 0.88rem; color: var(--muted); margin: 12px 0 0; font-style: italic; }
+
+      /* ---------- Documents ---------- */
+      .col h3.sec { font-size: 0.82rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+      .doc {
+        background: var(--paper); color: var(--paper-ink);
+        border: 1px solid var(--paper-line); border-radius: 6px;
+        padding: 14px 16px; margin-bottom: 12px;
+        box-shadow: 0 3px 10px rgba(30, 30, 10, 0.10);
+        animation: pop 0.25s ease;
+      }
+      .doc-head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid var(--paper-ink); padding-bottom: 6px; margin-bottom: 8px; }
+      .doc-head b { font-family: "Bricolage Grotesque", sans-serif; font-size: 1.02rem; }
+      .doc-head span { font-size: 0.78rem; font-weight: 700; color: #6b6455; }
+      .doc-row { display: flex; justify-content: space-between; gap: 10px; font-size: 0.86rem; padding: 3px 0; border-bottom: 1px dotted var(--paper-line); }
+      .doc-row:last-child { border-bottom: none; }
+      .doc-row .v { font-family: "IBM Plex Mono", monospace; font-weight: 600; white-space: nowrap; }
+
+      /* ---------- 1040 form ---------- */
+      .form1040 { background: var(--paper); color: var(--paper-ink); border: 1px solid var(--paper-line); border-radius: 6px; padding: 16px; box-shadow: 0 3px 10px rgba(30,30,10,0.10); }
+      .form1040 .f-head { border-bottom: 3px double var(--paper-ink); padding-bottom: 8px; margin-bottom: 6px; }
+      .form1040 .f-head b { font-family: "Bricolage Grotesque", sans-serif; font-size: 1.05rem; }
+      .form1040 .f-head span { display: block; font-size: 0.78rem; color: #6b6455; font-weight: 700; }
+      .f-row { display: flex; gap: 8px; align-items: baseline; padding: 6px 4px; border-bottom: 1px solid var(--paper-line); font-size: 0.86rem; }
+      .f-row .ln { font-family: "IBM Plex Mono", monospace; font-weight: 600; background: var(--paper-ink); color: var(--paper); border-radius: 4px; padding: 1px 7px; font-size: 0.78rem; flex: none; }
+      .f-row .lb { flex: 1; }
+      .f-row .fv { font-family: "IBM Plex Mono", monospace; font-weight: 600; white-space: nowrap; }
+      .f-row.filled { background: #eef6df; }
+      .f-row.active { background: var(--amber-soft); outline: 2px dashed var(--amber); outline-offset: -2px; }
+      .f-row .blank { color: #a49a7d; letter-spacing: 0.1em; }
+
+      /* ---------- Play panel ---------- */
+      .phase-tag {
+        display: inline-block; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.09em;
+        text-transform: uppercase; padding: 5px 12px; border-radius: 999px; margin-bottom: 12px;
+      }
+      .phase-tag.interview { background: var(--amber-soft); border: 1px solid var(--amber); }
+      .phase-tag.form { background: var(--accent-soft); border: 1px solid var(--accent); }
+      .phase-tag.result { background: var(--accent); color: #fff; }
+      @media (prefers-color-scheme: dark) { .phase-tag.result { color: #0b1510; } }
+      .play h2 { font-size: 1.45rem; margin-bottom: 8px; }
+      .play .prompt { font-size: 1.03rem; margin: 0 0 6px; }
+      .play .help { color: var(--muted); font-size: 0.93rem; margin: 0 0 16px; }
+      .speech {
+        background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px;
+        padding: 14px 16px; margin: 0 0 18px; font-size: 1rem;
+      }
+      .speech b { color: var(--accent-dark); }
+      .opts { display: flex; flex-direction: column; gap: 10px; }
+      .opt {
+        text-align: left; background: var(--surface); border: 2px solid var(--line);
+        border-radius: 11px; padding: 14px 16px; font-weight: 700; font-size: 1rem;
+        display: flex; justify-content: space-between; align-items: center; gap: 12px;
+        transition: border-color 0.12s ease, background 0.12s ease;
+        width: 100%;
+      }
+      .opt:hover:not(:disabled) { border-color: var(--accent); }
+      .opt .val { font-family: "IBM Plex Mono", monospace; font-weight: 600; }
+      .opt.good { border-color: var(--accent); background: var(--accent-soft); }
+      .opt.bad { border-color: var(--red); background: var(--red-soft); }
+      .opt:disabled { cursor: default; opacity: 0.92; }
+      .feedback { border-radius: 11px; padding: 14px 16px; margin-top: 16px; font-size: 0.97rem; animation: pop 0.25s ease; }
+      .feedback.good { background: var(--accent-soft); border: 1px solid var(--accent); }
+      .feedback.bad { background: var(--red-soft); border: 1px solid var(--red); }
+      .feedback b { display: block; margin-bottom: 3px; font-family: "Bricolage Grotesque", sans-serif; }
+      .feedback .btn { margin-top: 12px; }
+      .points-pop { font-family: "IBM Plex Mono", monospace; font-weight: 600; color: var(--accent-dark); }
+
+      /* ---------- Result ---------- */
+      .refund-hero { text-align: center; padding: 18px 10px 8px; }
+      .refund-hero .big { font-family: "IBM Plex Mono", monospace; font-size: clamp(2.2rem, 7vw, 3.2rem); font-weight: 600; color: var(--accent-dark); }
+      .refund-hero .cap { font-weight: 800; font-size: 1.05rem; }
+      .refund-hero.owes .big { color: var(--red); }
+      .refund-dual { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0 6px; }
+      @media (max-width: 640px) { .refund-dual { grid-template-columns: 1fr; } }
+      .refund-box { text-align: center; padding: 16px 10px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+      .refund-box .jurisdiction { display: block; font-size: 0.76rem; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+      .refund-box .big { font-family: "IBM Plex Mono", monospace; font-size: clamp(1.8rem, 5.5vw, 2.5rem); font-weight: 600; color: var(--accent-dark); line-height: 1.15; }
+      .refund-box.owes .big { color: var(--red); }
+      .refund-box.zero .big { color: var(--ink); }
+      .refund-box .cap { font-weight: 800; font-size: 0.98rem; margin-top: 4px; }
+      .refund-box .sub { font-size: 0.86rem; color: var(--muted); margin-top: 3px; }
+      .refund-stamp-wrap { text-align: center; }
+      .stamp {
+        display: inline-block; border: 3px solid var(--accent); color: var(--accent-dark);
+        font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; letter-spacing: 0.12em;
+        padding: 6px 18px; border-radius: 8px; transform: rotate(-3deg); margin: 10px 0 4px; text-transform: uppercase;
+      }
+      .lesson { background: var(--amber-soft); border: 1px solid var(--amber); border-radius: 11px; padding: 14px 16px; margin: 16px 0; font-size: 0.97rem; }
+      .lesson b { font-family: "Bricolage Grotesque", sans-serif; }
+      .result-stats { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0 18px; }
+
+      /* ---------- Ads ---------- */
+      .ad-banner {
+        margin-top: 18px; border: 1.5px dashed var(--amber); background: var(--amber-soft);
+        border-radius: 12px; padding: 12px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+      }
+      .ad-banner .ad-txt { flex: 1; min-width: 200px; font-size: 0.92rem; }
+      .ad-banner .ad-txt b { font-family: "Bricolage Grotesque", sans-serif; font-size: 1rem; }
+      .ad-banner .ad-kicker { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 2px; }
+      .ad-banner a.btn { padding: 10px 18px; font-size: 0.92rem; }
+      .spotlight { background: #0d3d27; color: #eafaf0; border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow); }
+      @media (prefers-color-scheme: dark) { .spotlight { background: #0a2e1e; border: 1px solid var(--line); } }
+      .spotlight .ad-kicker { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #f2b13e; display: block; margin-bottom: 10px; }
+      .spotlight h2 { color: #fff; font-size: 1.7rem; margin-bottom: 8px; }
+      .spotlight p { color: #cfe8d8; margin: 0 0 18px; max-width: 520px; }
+      .spotlight .price { font-family: "IBM Plex Mono", monospace; font-size: 1.3rem; color: #f2b13e; font-weight: 600; margin-bottom: 16px; display: block; }
+      .spotlight .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+      .spotlight .btn.ghost { border-color: #eafaf0; color: #eafaf0; }
+
+      .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 18px; }
+      @media (max-width: 700px) { .product-grid { grid-template-columns: 1fr; } }
+      .product { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; gap: 14px; }
+      .cover { width: 74px; height: 104px; border-radius: 5px; flex: none; padding: 9px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: inset 4px 0 0 rgba(0,0,0,0.18), 0 4px 10px rgba(0,0,0,0.18); }
+      .cover .ct { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 0.72rem; line-height: 1.25; }
+      .cover .cs { font-size: 0.58rem; font-weight: 700; opacity: 0.85; line-height: 1.3; }
+      .cover.playbook { background: #14342a; color: #f5d67a; }
+      .cover.coloring { background: #ffd23e; color: #4a2f00; }
+      .cover.tour { background: #2e7ea6; color: #fff8e6; }
+      .cover.tax { background: #ece7da; color: #14342a; }
+      .product h3 { font-size: 1.02rem; margin-bottom: 4px; }
+      .product p { font-size: 0.88rem; color: var(--muted); margin: 0 0 10px; }
+      .product .price { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 0.9rem; display: block; margin-bottom: 8px; }
+      .product a { font-weight: 800; font-size: 0.92rem; }
+
+      .grade { font-size: clamp(1.9rem, 5vw, 2.6rem); }
+      .stars { font-size: 1.6rem; letter-spacing: 0.2em; color: var(--amber); margin: 6px 0; }
+      .hidden { display: none !important; }
+      .timer-wrap { margin: 0 0 16px; }
+      .timer-label { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+      .timer-label b { font-family: "IBM Plex Mono", monospace; color: var(--red); }
+      .timer-bar { height: 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); overflow: hidden; }
+      .timer-fill { height: 100%; background: var(--amber); border-radius: 999px; transition: width 0.25s linear; }
+      .timer-fill.low { background: var(--red); }
+      .mode-banner { border-radius: 11px; padding: 12px 16px; margin: 0 0 16px; font-size: 0.95rem; animation: pop 0.25s ease; }
+      .mode-banner.challenge { background: #40201d; background: var(--red-soft); border: 1.5px solid var(--red); }
+      .mode-banner.coach { background: var(--accent-soft); border: 1.5px solid var(--accent); }
+      .mode-banner b { font-family: "Bricolage Grotesque", sans-serif; }
+      .hint-box { background: var(--surface-2); border-left: 4px solid var(--accent); border-radius: 0 10px 10px 0; padding: 10px 14px; font-size: 0.92rem; margin: 0 0 16px; }
+      .hint-box b { color: var(--accent-dark); }
+      .doc.decoy { opacity: 0.75; border-style: dashed; }
+      .doc-note { font-size: 0.85rem; font-weight: 700; color: var(--red); margin: 0 0 10px; }
+      .key-input {
+        width: 100%; padding: 13px 14px; font-family: "IBM Plex Mono", monospace; font-size: 1rem;
+        border-radius: 10px; border: 2px solid #3a5a48; background: #0a2e1e; color: #eafaf0;
+        letter-spacing: 0.04em; text-transform: uppercase;
+      }
+      .key-input::placeholder { color: #7fa68d; text-transform: none; letter-spacing: 0; }
+      .gate-list { text-align: left; margin: 0 0 18px; padding-left: 20px; color: #cfe8d8; }
+      .gate-list li { margin-bottom: 6px; }
+      .gate-options { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 18px 0 6px; }
+      @media (max-width: 700px) { .gate-options { grid-template-columns: 1fr; } }
+      .gate-opt { background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.28); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; }
+      .gate-opt.featured { border-color: #f2b13e; background: rgba(242,177,62,0.13); }
+      .gate-opt h3 { color: #fff; font-size: 1.18rem; margin: 0 0 4px; }
+      .gate-opt .g-price { font-family: "IBM Plex Mono", monospace; font-size: 1.35rem; color: #f2b13e; font-weight: 600; margin: 2px 0 8px; }
+      .gate-opt p { color: #cfe8d8; font-size: 0.93rem; margin: 0 0 14px; flex: 1; }
+      .gate-opt .btn { width: 100%; text-align: center; }
+      .gate-opt .g-tag { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #f2b13e; display: block; margin-bottom: 6px; }
+      .gate-err { color: #ffb3ab; font-weight: 700; font-size: 0.92rem; margin-top: 10px; }
+      .gate-ok { color: #8fe3b6; font-weight: 800; margin-top: 10px; }
+      .spotlight .textbtn { background: none; border: none; color: #f2b13e; font-weight: 800; text-decoration: underline; padding: 10px 6px; cursor: pointer; }
+      .diff-badge { display: inline-block; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px; margin-left: 8px; vertical-align: middle; }
+      @keyframes pop { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+      .step-anim { animation: pop 0.25s ease; }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation: none !important; transition: none !important; }
+        html { scroll-behavior: auto; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hud hidden" id="hud">
+      <div class="hud-in">
+        <span class="hud-label">The 1040 <span>Game</span></span>
+        <span class="chip">Trainee client <b id="hud-client">1 of 10</b></span>
+        <span class="season-dots" id="hud-dots" aria-hidden="true"></span>
+        <span class="hud-spacer"></span>
+        <span class="chip">Streak <b id="hud-streak">0</b></span>
+        <span class="chip gold">Score <b id="hud-score">0</b></span>
+        <span class="chip">Fees earned <b id="hud-fees">$0</b></span>
+        <span class="byline">by Genextra LLC</span>
+      </div>
+    </header>
+
+    <main class="wrap" id="app"></main>
+
+    <script>
+      "use strict";
+      var money = function (n) { return "$" + Math.abs(n).toLocaleString("en-US"); };
+      var esc = function (s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;"); };
+
+      /* Hidden play tracking via Abacus: one hit on page load, one hit each time a new game session starts. Fire-and-forget and invisible. */
+      function trackHit(counter) {
+        try {
+          var p = fetch("https://abacus.jasoncameron.dev/hit/the-1040-game/" + counter, { mode: "no-cors", keepalive: true });
+          if (p && p.catch) p.catch(function () {});
+        } catch (e) {}
+      }
+      trackHit("visits");
+
+      /* ================= Products ================= */
+      var PRODUCTS = [
+        {
+          id: "game", cover: "tax", coverTitle: "The 1040 Game", coverSub: "Full training game · 10 cases",
+          name: "The 1040 Game", price: "$69.99",
+          desc: "The full game on its own: all ten training cases, challenge rounds, coach mode, and your final preparer grade.",
+          cta: "Get The 1040 Game", url: "https://luxurytaxes.gumroad.com/l/drgojm"
+        },
+        {
+          id: "playbook", cover: "playbook", coverTitle: "Tax Preparer Playbook", coverSub: "Start and run a real tax prep business",
+          name: "Tax Preparer Playbook", price: "$199",
+          desc: "The step by step playbook for doing this work for real: clients, interviews, forms, fees, and a full tax season, start to finish. Includes The 1040 Game.",
+          cta: "Get the Playbook", url: "https://luxurytaxes.gumroad.com/l/ynjbo"
+        },
+        {
+          id: "coloring", cover: "coloring", coverTitle: "My First Coloring Book for Toddlers", coverSub: "50 designs, made by children, for children",
+          name: "My First Coloring Book for Toddlers", price: "$9.99",
+          desc: "Fifty big, bold designs for little hands: animals, early learning, and pages a toddler can actually finish.",
+          cta: "See it on Amazon", url: "https://www.amazon.com/dp/B0HP5K44WN"
+        },
+        {
+          id: "tour", cover: "tour", coverTitle: "Mommy, What's a Tour?", coverSub: "A picture book about life on the road",
+          name: "Mommy, What's a Tour?", price: "Kindle edition",
+          desc: "A little boy flies to Miami to visit his dad on tour and learns what a tour really is, bus, stage, lights, and all.",
+          cta: "Read it on Kindle", url: "https://www.amazon.com/dp/B0HSPYVZBJ"
+        },
+        {
+          id: "tax", cover: "tax", coverTitle: "Luxury Taxes NYC", coverSub: "Tax filing, resolution, and planning",
+          name: "Luxury Taxes NYC", price: "Free consultation",
+          desc: "Real tax filing, tax resolution, and planning from a working preparer. Consultations are free, service is virtual, all 50 states.",
+          cta: "Book a free consultation", url: "https://luxurytaxesnyc1.voolt.com/"
+        }
+      ];
+      var BREAK_ORDER = ["coloring", "playbook", "tour", "tax", "coloring", "playbook"];
+      function productById(id) { for (var i = 0; i < PRODUCTS.length; i++) if (PRODUCTS[i].id === id) return PRODUCTS[i]; return PRODUCTS[0]; }
+
+      /* ================= Clients =================
+         Training cases use tax year 2025 figures under current law, simplified for training:
+         standard deduction Single 15,750 / Head of Household 23,625 / Joint 31,500, Child Tax Credit 2,200.
+         Federal brackets: 10 percent first bracket, 12 percent second, 22 percent third.
+         Every case also handles the state side: New York (IT-201), New Jersey (NJ-1040),
+         Delaware, or Florida, each with that state's own up to date 2025 rules.
+         Delaware has no sales tax; it does tax income. Florida is the opposite case in this game:
+         no state income tax and no state income tax return for a wage earner, but it does charge sales tax. */
+      var CLIENTS = [
+        {
+          id: "jordan", type: "W-2 only", tier: 1, level: "Level 1 · Starter return", fee: 120,
+          name: "Jordan Lee", tag: "First time filer, one job · New York City", initials: "JL", color: "#2e7ea6",
+          story: "Jordan works at a grocery store in New York City and has never filed with a preparer before. One W-2, no kids, no side work that we know of yet. The interview decides what we know. Because Jordan lives and works in the city, the W-2 carries New York City tax withheld in its local boxes, and the New York return has a city part as well as a state part.",
+          docs: [
+            { title: "Form W-2", sub: "Tax Year 2025", rows: [["Employer", "FreshMart Grocery"], ["Box 1 · Wages", "$24,600"], ["Box 2 · Federal tax withheld", "$1,800"], ["Box 3 · Social Security wages", "$24,600"], ["Box 4 · Social Security tax", "$1,525"], ["Box 5 · Medicare wages", "$24,600"], ["Box 16 · State wages (NY)", "$24,600"], ["Box 17 · State tax withheld", "$700"], ["Box 19 · Local wages", "$24,600"], ["Box 20 · Local income tax withheld", "$450"], ["Locality", "New York, NY"]] }
+          ],
+          decoy: { title: "Form W-2", sub: "Tax Year 2025 · LAST YEAR", rows: [["Employer", "FreshMart Grocery"], ["Box 1 · Wages", "$22,900"], ["Box 2 · Federal tax withheld", "$1,610"]] },
+          asks: [
+            { prompt: "The interview opens. Pick the question that matters most first.",
+              speech: "I just brought the one paper they gave me at work. Is that enough?",
+              options: [
+                { t: "Did anything change this year? Marriage, a move, a new job?", ok: true, why: "Right. Life changes drive the whole return, so a trained preparer always opens with the year in review." },
+                { t: "What is your favorite color?", ok: false, why: "Friendly, but it does not move the return. Ask about the tax year." },
+                { t: "Can you pay the prep fee in cash today?", ok: false, why: "Fees come after the work. The interview comes first." }
+              ],
+              reveal: { fact: "Single all year, one job, same apartment in New York City all year" } },
+            { prompt: "Dependents decide credits and status. What do you ask?",
+              speech: "It is just me at home. My sister visits a lot though.",
+              options: [
+                { t: "Do you live with anyone you support? Kids, parents, anyone who counts on you?", ok: true, why: "Correct. Visits do not make a dependent. Support and living arrangements do." },
+                { t: "Do you have a pet?", ok: false, why: "Pets are family, but the IRS does not count them as dependents." },
+                { t: "What kind of car do you drive?", ok: false, why: "A car matters for some work returns. It does not decide dependents." }
+              ],
+              reveal: { fact: "Lives alone. No dependents to claim" } },
+            { prompt: "Last check before you build the return.",
+              speech: "I think that is everything. One job, one paper.",
+              options: [
+                { t: "Did any other tax papers come in the mail? Bank forms, a 1099, anything at all?", ok: true, why: "Exactly the trained habit. One forgotten form is how good returns go wrong." },
+                { t: "Do you want to hear about our fastest refund option?", ok: false, why: "Products wait. Completeness of the file comes first." },
+                { t: "Are you happy with your current bank?", ok: false, why: "Not a tax question. Stay on the documents." }
+              ],
+              reveal: { fact: "Only the W-2. No other income" } }
+          ],
+          steps: [
+            { line: "Status", label: "Filing status", prompt: "Set the filing status.", help: "Single all year, lives alone, no dependents.", hint: "No spouse and no qualifying person means Single.",
+              options: [ { t: "Single", ok: true, why: "Correct. No spouse, no dependents, so Single it is." }, { t: "Head of Household", ok: false, why: "Head of Household needs a qualifying person living with the filer. Jordan lives alone." }, { t: "Married Filing Jointly", ok: false, why: "Jordan was not married this year." } ] },
+            { line: "1a", label: "Total amount from Form W-2, Box 1", prompt: "Line 1a: enter the wages.", help: "Wages live in Box 1 of the W-2.", hint: "Box 1, not Box 2. Box 2 is tax already paid.",
+              options: [ { t: "$24,600", ok: true, why: "Right. Box 1 goes to Line 1a." }, { t: "$1,800", ok: false, why: "That is Box 2, the tax already withheld. It lands later, on Line 25a." }, { t: "$1,525", ok: false, why: "That is Box 4, Social Security tax. It does not go on the 1040 income lines." } ] },
+            { line: "12", label: "Standard deduction", prompt: "Line 12: the standard deduction.", help: "Tax year 2025 standard deduction for a single filer.", hint: "Single filers get 15,750 in this training year.",
+              options: [ { t: "$15,750", ok: true, why: "Correct for Single in 2025." }, { t: "$23,625", ok: false, why: "That is the Head of Household amount. Jordan files Single." }, { t: "$31,500", ok: false, why: "That is the joint amount for a married couple." } ] },
+            { line: "15", label: "Taxable income", prompt: "Line 15: taxable income.", help: "Total income minus the deduction: 24,600 minus 15,750.", hint: "Subtract Line 12 from Line 9.",
+              options: [ { t: "$8,850", ok: true, why: "Right. Only 8,850 of the pay is actually taxed." }, { t: "$24,600", ok: false, why: "That skips the deduction. The deduction comes off first." }, { t: "$8,600", ok: false, why: "Check the subtraction: 24,600 minus 15,750 is 8,850." } ] },
+            { line: "16", label: "Tax", prompt: "Line 16: figure the tax.", help: "Game Tax Table: Jordan sits in the 10 percent bracket, so the tax is 10 percent of 8,850.", hint: "Ten percent of the taxable income.",
+              options: [ { t: "$885", ok: true, why: "Correct. That is the real tax bill before payments." }, { t: "$2,460", ok: false, why: "That is 10 percent of the full pay. The tax applies to taxable income, after the deduction." }, { t: "$1,800", ok: false, why: "That is the withholding from Box 2, not the tax." } ] },
+            { line: "25a", label: "Federal income tax withheld from W-2", prompt: "Line 25a: enter the withholding.", help: "Withholding is Box 2 of the W-2.", hint: "Box 2 is money the employer already sent to the IRS.",
+              options: [ { t: "$1,800", ok: true, why: "Right. This is a payment Jordan already made through payroll." }, { t: "$885", ok: false, why: "That is the tax from Line 16. Withholding is its own number." }, { t: "$24,600", ok: false, why: "That is the wages again. Withholding is Box 2." } ] },
+            { line: "34", label: "Overpayment · refund", prompt: "Withholding is 1,800 and the tax is 885. What lands on Line 34?", help: "When payments beat the tax, the IRS refunds the difference.", hint: "1,800 minus 885.",
+              options: [ { t: "Refund of $915", ok: true, why: "Correct. Jordan overpaid by 915 during the year." }, { t: "Owes $915", ok: false, why: "Other way around. Jordan paid in more than the tax, so money comes back." }, { t: "Even, $0", ok: false, why: "The numbers are not equal. 1,800 in, 885 of tax." } ] },
+            { line: "NY", label: "New York IT-201 · standard deduction", prompt: "Federal is filed. Now the New York return: which standard deduction does New York give a single filer for 2025?", help: "New York sets its own standard deduction, separate from the federal one.", hint: "States set their own amounts. New York Single is much smaller than federal.",
+              options: [ { t: "$8,000", ok: true, why: "Correct. New York's single standard deduction is 8,000 for 2025, far below the federal 15,750, which is why state taxable income runs higher." }, { t: "$15,750", ok: false, why: "That is the federal amount. New York uses its own, smaller deduction." }, { t: "$3,250", ok: false, why: "That is Delaware's single amount. Jordan files in New York." } ] },
+            { line: "NY Tax", label: "New York State tax", prompt: "New York taxable income is 24,600 minus 8,000, which is 16,600. The New York State tax table puts the state tax at 748, and the W-2 Box 17 shows 700 of New York State tax already withheld. How much state tax is still owed, before the city part?", help: "State tax of 748 against state withholding of 700 in Box 17.", hint: "748 minus 700, and the tax is bigger, so the difference is owed.",
+              options: [ { t: "Owes New York State $48", ok: true, why: "Correct for the state part. 748 of state tax minus 700 withheld in Box 17 leaves 48 still owed to the state. The city part comes next, on the same IT-201." }, { t: "New York State refund of $48", ok: false, why: "Direction matters. The state tax beat the state withholding in Box 17, so Jordan owes the state, not the other way around." }, { t: "Owes New York State $748", ok: false, why: "That forgets the 700 already withheld in Box 17. Withholding is a payment, and it is credited against the tax." } ] },
+            { line: "NYC Tax", label: "New York City tax · Box 20 withholding credited", prompt: "Jordan lived in New York City all year, so there is a city tax on top of the state tax. On the same 16,600 of taxable income, the New York City tax is 542. The W-2 carries the city withholding in its local boxes: Box 19 local wages 24,600, Box 20 local income tax withheld 450, locality New York, NY. Credit the Box 20 city withholding, add it to the state part, and finish the whole New York return.", help: "Total New York tax is 748 state plus 542 city, which is 1,290. Total New York withholding is 700 in Box 17 plus 450 in Box 20, which is 1,150.", hint: "City part first: 542 minus the 450 credited from Box 20 is 92 owed to the city. Then add the 48 still owed to the state.",
+              options: [ { t: "Owes New York $140 in total", ok: true, why: "Correct. The Box 20 city withholding of 450 is credited against the 542 city tax, leaving 92 owed to the city. Add the 48 owed to the state and the whole New York return balances at 140 owed: total tax 1,290 minus total withholding 1,150. A federal refund and a New York balance due can happen on the very same return." }, { t: "Owes New York $48 in total", ok: false, why: "That is the state part only. It leaves out the city tax, and it never credits the 450 of city tax withheld in Box 20." }, { t: "New York refund of $140", ok: false, why: "Direction matters. Total New York tax of 1,290 beat total New York withholding of 1,150, so Jordan owes the difference." } ] }
+          ],
+          result: { amount: 915, stateAmount: -140, stateLabel: "New York (State + City)", lesson: "Box 1 is income. Box 2 is money already paid in. When withholding beats the tax, the IRS sends back the difference, and that gap is the refund. Every return you ever train on runs on that one idea. Then the New York return runs on its own rules, in two parts. New York State gave Jordan a much smaller 8,000 dollar deduction: state tax 748, minus the 700 withheld in Box 17, left 48 owed to the state. New York City taxed the same income too: city tax 542, minus the 450 of city tax withheld in Box 20 (local wages 24,600 in Box 19, locality New York, NY), left 92 owed to the city. Total New York owed is 140, even with a 915 dollar federal refund on the same return. Always read the local boxes at the bottom of the W-2: for a city resident, that withholding is real money already paid in." }
+        },
+        {
+          id: "tanya", type: "Head of Household", tier: 2, level: "Level 2 · Household case", fee: 180,
+          name: "Tanya Brooks", tag: "Nurse, one daughter · New Jersey", initials: "TB", color: "#8a5a2b",
+          story: "Tanya is a nurse with a W-2 and a savings account. She mentions a daughter in passing. Trained preparers do not let that pass: the household questions are where this return is won or lost.",
+          docs: [
+            { title: "Form W-2", sub: "Tax Year 2025", rows: [["Employer", "City Hospital"], ["Box 1 · Wages", "$36,900"], ["Box 2 · Federal tax withheld", "$2,600"], ["Box 16 · State wages (NJ)", "$36,900"], ["Box 17 · State tax withheld", "$900"]] }
+          ],
+          decoy: { title: "Form W-2", sub: "Tax Year 2025 · LAST YEAR", rows: [["Employer", "City Hospital"], ["Box 1 · Wages", "$34,200"], ["Box 2 · Federal tax withheld", "$2,310"]] },
+          asks: [
+            { prompt: "She mentioned a daughter. What do you ask next?",
+              speech: "My daughter just turned seven. She is with me all the time.",
+              options: [
+                { t: "Who lives with you, and for how much of the year?", ok: true, why: "Right. Months in the home is a core dependent test, and it drives filing status too." },
+                { t: "What school does she go to?", ok: false, why: "The school name does not decide anything on this return. Months and support do." },
+                { t: "Do you want to claim her, yes or no?", ok: false, why: "Never ask the client to make the tax call. You ask facts, then you decide." }
+              ],
+              reveal: { fact: "Daughter, age 7, lived with Tanya all 12 months" } },
+            { prompt: "Status turns on who pays for the home. Ask it properly.",
+              speech: "Her dad and I were never married. He is not in the picture.",
+              options: [
+                { t: "Do you pay for the home where you and your daughter live?", ok: true, why: "Correct. Paying for the home for a qualifying child is the heart of Head of Household." },
+                { t: "Do you get along with her dad?", ok: false, why: "Personal, and it decides nothing. Stick to the tests." },
+                { t: "Would you rather file Single? It is simpler.", ok: false, why: "Simpler is not the standard. The right status is, and it is worth real money here." }
+              ],
+              reveal: { fact: "Tanya pays the rent and upkeep. Not married this year" } },
+            { prompt: "One more document check before you build.",
+              speech: "The bank sent me something small in January. I almost threw it away.",
+              options: [
+                { t: "Did the bank send a form for interest on your savings account?", ok: true, why: "Good catch. Small forms still count, and this one adds income to Line 2b." },
+                { t: "Was it junk mail? Banks send a lot of that.", ok: false, why: "Never assume a January envelope is junk. January mail is tax season mail." },
+                { t: "How much do you keep in savings, roughly?", ok: false, why: "The balance is not taxed. The interest is, and the form states it." }
+              ],
+              reveal: { fact: "Form 1099-INT shows $100 of bank interest",
+                doc: { title: "Form 1099-INT", sub: "Tax Year 2025", rows: [["Payer", "Community Bank"], ["Box 1 · Interest income", "$100"]] } } }
+          ],
+          steps: [
+            { line: "Status", label: "Filing status", prompt: "Set the filing status.", help: "Not married, pays for the home, daughter lived with her all year.", hint: "That fact pattern is Head of Household.",
+              options: [ { t: "Head of Household", ok: true, why: "Correct. Bigger standard deduction than Single, earned through the household facts." }, { t: "Single", ok: false, why: "Single leaves money behind. She qualifies for Head of Household." }, { t: "Married Filing Jointly", ok: false, why: "She was not married this year." } ] },
+            { line: "1a", label: "Total amount from Form W-2, Box 1", prompt: "Line 1a: the wages.", help: "From the hospital W-2, Box 1.", hint: "Box 1 of the W-2.",
+              options: [ { t: "$36,900", ok: true, why: "Right." }, { t: "$2,600", ok: false, why: "That is Box 2 withholding. It belongs on Line 25a." }, { t: "$37,000", ok: false, why: "That is total income after interest. Line 1a is wages only." } ] },
+            { line: "2b", label: "Taxable interest", prompt: "Line 2b: the bank interest.", help: "From Form 1099-INT, Box 1.", hint: "The small form from the bank.",
+              options: [ { t: "$100", ok: true, why: "Correct. Small, but it is income and it goes on the return." }, { t: "$0", ok: false, why: "The 1099-INT says 100. Leaving it off invites an IRS notice." }, { t: "$2,600", ok: false, why: "That is the W-2 withholding, not interest." } ] },
+            { line: "9", label: "Total income", prompt: "Line 9: total income.", help: "Wages plus interest: 36,900 plus 100.", hint: "Add Lines 1a and 2b.",
+              options: [ { t: "$37,000", ok: true, why: "Right." }, { t: "$36,900", ok: false, why: "That forgets the interest you worked to find." }, { t: "$39,600", ok: false, why: "That adds the withholding as income. Withholding is a payment, not income." } ] },
+            { line: "12", label: "Standard deduction", prompt: "Line 12: the standard deduction.", help: "Tax year 2025 amount for Head of Household.", hint: "Head of Household gets more than Single: 23,625.",
+              options: [ { t: "$23,625", ok: true, why: "Correct for Head of Household in 2025." }, { t: "$15,750", ok: false, why: "That is the Single amount. Her status earns the bigger one." }, { t: "$31,500", ok: false, why: "That is the joint amount for married couples." } ] },
+            { line: "15", label: "Taxable income", prompt: "Line 15: taxable income.", help: "37,000 minus 23,625.", hint: "Total income minus the deduction.",
+              options: [ { t: "$13,375", ok: true, why: "Right." }, { t: "$37,000", ok: false, why: "That skips the deduction." }, { t: "$21,250", ok: false, why: "That uses the Single deduction of 15,750. Hers is 23,625." } ] },
+            { line: "16", label: "Tax", prompt: "Line 16: figure the tax.", help: "Game Tax Table: Head of Household filers pay 10 percent on this range, so 10 percent of 13,375.", hint: "Ten percent of taxable income.",
+              options: [ { t: "$1,338", ok: true, why: "Correct, before credits. 10 percent of 13,375 is 1,337.50, and the tax table rounds it to 1,338." }, { t: "$3,700", ok: false, why: "That is 10 percent of total income. Tax runs on taxable income." }, { t: "$2,600", ok: false, why: "That is withholding, not tax." } ] },
+            { line: "19", label: "Child Tax Credit", prompt: "Line 19: the Child Tax Credit.", help: "Her daughter is 7. For tax year 2025 the credit for a child under 17 is 2,200.", hint: "Under 17 means the full 2,200 credit.",
+              options: [ { t: "$2,200", ok: true, why: "Correct. Age 7 clears the under 17 test with room to spare, and the 2025 credit is 2,200." }, { t: "$500", ok: false, why: "500 is the credit for an older dependent. She is 7." }, { t: "$0", ok: false, why: "She qualifies. This is the credit the interview was hunting for." } ] },
+            { line: "24", label: "Total tax after credits", prompt: "Line 24: tax after the credit.", help: "Tax was 1,338. The credit is 2,200, and credits on this line cannot push tax below zero.", hint: "The credit covers the whole tax. The line stops at zero.",
+              options: [ { t: "$0", ok: true, why: "Right. The credit wipes out the tax. On a real return, part of the leftover credit can come back through the Additional Child Tax Credit; this training case keeps the math on Line 24." }, { t: "$1,338", ok: false, why: "That ignores the credit you just claimed." }, { t: "$510", ok: false, why: "The credit covers the whole 1,338 of tax. Nothing is left on this line." } ] },
+            { line: "25a", label: "Federal income tax withheld from W-2", prompt: "Line 25a: the withholding.", help: "Box 2 of the hospital W-2.", hint: "Box 2.",
+              options: [ { t: "$2,600", ok: true, why: "Right." }, { t: "$1,338", ok: false, why: "That was the tax before credits." }, { t: "$36,900", ok: false, why: "That is wages. Withholding is Box 2." } ] },
+            { line: "34", label: "Overpayment · refund", prompt: "Finish it. Tax after credits is zero and she paid in 2,600.", help: "Every dollar she paid in comes back.", hint: "Payments of 2,600 against tax of zero.",
+              options: [ { t: "Refund of $2,600", ok: true, why: "Correct. The whole withholding is refunded." }, { t: "Refund of $1,090", ok: false, why: "That subtracts the old tax. The credit already zeroed it." }, { t: "Owes $490", ok: false, why: "No. Her payments beat her tax by the full 2,600." } ] },
+            { line: "NJ", label: "New Jersey NJ-1040 · exemptions", prompt: "Now the New Jersey return. New Jersey has no standard deduction like the federal one. Instead it gives exemptions: 1,000 for the filer and 1,500 for each dependent. Total Tanya's exemptions.", help: "1,000 for Tanya plus 1,500 for her daughter.", hint: "New Jersey exemptions are much smaller than a standard deduction.",
+              options: [ { t: "$2,500", ok: true, why: "Correct. 1,000 plus 1,500. New Jersey starts taxing much closer to full income than the federal return does." }, { t: "$23,625", ok: false, why: "That is her federal Head of Household deduction. New Jersey does not copy it." }, { t: "$1,000", ok: false, why: "That forgets her daughter's 1,500 dollar dependent exemption." } ] },
+            { line: "NJ Tax", label: "New Jersey tax and result", prompt: "New Jersey taxable income is 37,000 minus 2,500, which is 34,500. At New Jersey's starting rates of 1.4 and 1.75 percent, the tax is 534. Her W-2 Box 17 shows 900 of New Jersey tax withheld. Finish the state return.", help: "State tax of 534 against state withholding of 900.", hint: "900 minus 534.",
+              options: [ { t: "New Jersey refund of $366", ok: true, why: "Correct. New Jersey rates start low, so her withholding covered the state tax with room to spare." }, { t: "Owes New Jersey $366", ok: false, why: "Her state withholding beat the state tax, so money comes back." }, { t: "New Jersey refund of $2,600", ok: false, why: "That is the federal refund. The state return stands on its own numbers." } ] }
+          ],
+          result: { amount: 2600, stateAmount: 366, stateLabel: "New Jersey", lesson: "Two interview answers changed this return. Head of Household brought a standard deduction of 23,625 instead of 15,750, and a child under 17 brought a 2,200 dollar Child Tax Credit at the 2025 amount. Then New Jersey ran its own math: no standard deduction at all, just 2,500 of exemptions, and a 366 dollar state refund. Miss the household questions in training and you will miss them for real." }
+        },
+        {
+          id: "patel", type: "Married Filing Jointly", tier: 2, level: "Level 2 · Joint return", fee: 220,
+          name: "Samir and Priya Patel", tag: "Married couple, one young child · New York City", initials: "SP", color: "#5b7a3a",
+          story: "A married couple, both working in New York City, with a four year old son. They live and work in the city, so both W-2 forms carry New York City tax withheld in their local boxes, and the New York return has a city part as well as a state part. Joint returns are an interview about two people at once: two jobs, two W-2 forms, one combined picture.",
+          docs: [
+            { title: "Form W-2 · Samir", sub: "Tax Year 2025", rows: [["Employer", "Metro Transit"], ["Box 1 · Wages", "$41,000"], ["Box 2 · Federal tax withheld", "$4,200"], ["Box 16 · State wages (NY)", "$41,000"], ["Box 17 · State tax withheld", "$1,700"], ["Box 19 · Local wages", "$41,000"], ["Box 20 · Local income tax withheld", "$720"], ["Locality", "New York, NY"]] },
+            { title: "Form W-2 · Priya", sub: "Tax Year 2025", rows: [["Employer", "Bright Smiles Dental"], ["Box 1 · Wages", "$28,400"], ["Box 2 · Federal tax withheld", "$2,300"], ["Box 16 · State wages (NY)", "$28,400"], ["Box 17 · State tax withheld", "$1,200"], ["Box 19 · Local wages", "$28,400"], ["Box 20 · Local income tax withheld", "$500"], ["Locality", "New York, NY"]] }
+          ],
+          decoy: { title: "Form W-2 · Priya", sub: "Tax Year 2025 · LAST YEAR", rows: [["Employer", "Bright Smiles Dental"], ["Box 1 · Wages", "$26,100"], ["Box 2 · Federal tax withheld", "$2,050"]] },
+          asks: [
+            { prompt: "Two adults, one return. What do you confirm first?",
+              speech: "We both work. Mine is the transit job, hers is the dental office.",
+              options: [
+                { t: "Did both of you work all year, and do we have both W-2 forms here?", ok: true, why: "Right. A joint return needs every form from both spouses before it can be built." },
+                { t: "Who earns more?", ok: false, why: "It does not change a joint return, and it can sour the room. Ask for documents." },
+                { t: "Do you want two separate refunds?", ok: false, why: "One joint return produces one combined result. That is the point of filing jointly." }
+              ],
+              reveal: { fact: "Both spouses worked. Two W-2 forms, one joint return" } },
+            { prompt: "Now the dependents question, asked the trained way.",
+              speech: "Our son is four. He is with his grandmother during the day.",
+              options: [
+                { t: "Does your son live with you, and did he live with you all year?", ok: true, why: "Correct. Daytime care does not change it. Where the child lives is the test." },
+                { t: "Is he in school yet?", ok: false, why: "School does not decide the credit at age four. Age and home do." },
+                { t: "Do you spend a lot on toys?", ok: false, why: "Spending on a child is not the test. Relationship, age, and home are." }
+              ],
+              reveal: { fact: "Son, age 4, lived with them all year" } },
+            { prompt: "One judgment call left in the interview.",
+              speech: "Friends told us filing separately gets two refunds. Is that true?",
+              options: [
+                { t: "Any reason to file separately, like a separation or a big individual debt issue?", ok: true, why: "Right question. Separate filing is a tool for specific problems, and it usually costs credits. None of those problems are here." },
+                { t: "Yes, two refunds, let us split everything.", ok: false, why: "That advice is wrong for most couples, and separate filing can kill the credits they qualify for." },
+                { t: "Who filed first last year?", ok: false, why: "Order does not matter. The facts of this year do." }
+              ],
+              reveal: { fact: "No reason to file separately. Joint filing is the right call" } }
+          ],
+          steps: [
+            { line: "Status", label: "Filing status", prompt: "Set the filing status.", help: "Married, living together, no reason to file separately.", hint: "Married Filing Jointly.",
+              options: [ { t: "Married Filing Jointly", ok: true, why: "Correct." }, { t: "Married Filing Separately", ok: false, why: "No facts support it, and it usually costs the family credits." }, { t: "Head of Household", ok: false, why: "They are married and living together. That status is for a different household shape." } ] },
+            { line: "1a", label: "Total amount from both W-2 forms, Box 1", prompt: "Line 1a: combined wages.", help: "Add both Box 1 amounts: 41,000 plus 28,400.", hint: "Both W-2 forms go on Line 1a together.",
+              options: [ { t: "$69,400", ok: true, why: "Right. Both incomes combine on a joint return." }, { t: "$41,000", ok: false, why: "That is only Samir. Priya worked too, and the interview caught it." }, { t: "$28,400", ok: false, why: "That is only Priya. Add both." } ] },
+            { line: "12", label: "Standard deduction", prompt: "Line 12: the standard deduction.", help: "Tax year 2025 amount for Married Filing Jointly.", hint: "Joint filers get 31,500 in this training year.",
+              options: [ { t: "$31,500", ok: true, why: "Correct." }, { t: "$15,750", ok: false, why: "That is the Single amount, half of the joint amount." }, { t: "$23,625", ok: false, why: "That is Head of Household." } ] },
+            { line: "15", label: "Taxable income", prompt: "Line 15: taxable income.", help: "69,400 minus 31,500.", hint: "Total income minus the joint deduction.",
+              options: [ { t: "$37,900", ok: true, why: "Right." }, { t: "$69,400", ok: false, why: "That skips the deduction." }, { t: "$11,000", ok: false, why: "Check the math: 69,400 minus 31,500 is 37,900." } ] },
+            { line: "16", label: "Tax", prompt: "Line 16: figure the tax.", help: "Game Tax Table for joint filers: the first 23,850 at 10 percent is 2,385. The remaining 14,050 at 12 percent is 1,686.", hint: "Add the two bracket pieces: 2,385 plus 1,686.",
+              options: [ { t: "$4,071", ok: true, why: "Correct. Two brackets, added together." }, { t: "$3,790", ok: false, why: "That is a flat 10 percent. Income above the first bracket pays 12 percent." }, { t: "$2,385", ok: false, why: "That is only the first bracket. The rest of the income is taxed too." } ] },
+            { line: "19", label: "Child Tax Credit", prompt: "Line 19: the Child Tax Credit.", help: "Their son is 4, well under 17.", hint: "One child under 17, one 2,200 credit at the 2025 amount.",
+              options: [ { t: "$2,200", ok: true, why: "Correct." }, { t: "$500", ok: false, why: "500 is for an older dependent. He is four." }, { t: "$4,400", ok: false, why: "One child, one credit." } ] },
+            { line: "24", label: "Total tax after credits", prompt: "Line 24: tax after the credit.", help: "4,071 minus 2,200.", hint: "Tax minus the Child Tax Credit.",
+              options: [ { t: "$1,871", ok: true, why: "Right." }, { t: "$4,071", ok: false, why: "That ignores the credit." }, { t: "$6,271", ok: false, why: "Credits subtract from tax. They never add to it." } ] },
+            { line: "25", label: "Total withheld from both W-2 forms", prompt: "Line 25: total withholding.", help: "Add Box 2 from both W-2 forms: 4,200 plus 2,300.", hint: "Withholding combines just like wages do.",
+              options: [ { t: "$6,500", ok: true, why: "Correct. Both jobs paid in." }, { t: "$4,200", ok: false, why: "That is only Samir. Priya withheld too." }, { t: "$2,300", ok: false, why: "That is only Priya. Add both Box 2 amounts." } ] },
+            { line: "34", label: "Overpayment · refund", prompt: "They paid in 6,500 against a tax of 1,871. What lands on Line 34?", help: "Payments minus tax is the refund.", hint: "6,500 minus 1,871.",
+              options: [ { t: "Refund of $4,629", ok: true, why: "Correct." }, { t: "Refund of $1,871", ok: false, why: "That is the tax, not the refund. Refund is payments minus tax." }, { t: "Owes $4,629", ok: false, why: "They overpaid, so money comes back." } ] },
+            { line: "NY", label: "New York IT-201 · standard deduction", prompt: "Now the New York return for the Patels. Which standard deduction does New York give a married couple filing jointly for 2025?", help: "New York's joint amount is its own number, not the federal one.", hint: "New York joint filers get 16,050.",
+              options: [ { t: "$16,050", ok: true, why: "Correct. New York's joint standard deduction is 16,050 for 2025, about half the federal amount." }, { t: "$31,500", ok: false, why: "That is the federal joint deduction. New York sets its own." }, { t: "$8,000", ok: false, why: "That is New York's single amount. They file jointly." } ] },
+            { line: "NY Tax", label: "New York State tax", prompt: "New York taxable income is 69,400 minus 16,050, which is 53,350. Working through New York's brackets from 4 percent up, the state tax is 2,602. Their two W-2 forms show 2,900 of New York State tax withheld in Box 17. How much state tax comes back, before the city part?", help: "State tax of 2,602 against state withholding of 2,900 in Box 17.", hint: "2,900 minus 2,602, and the withholding is bigger, so this part is a refund.",
+              options: [ { t: "New York State refund of $298", ok: true, why: "Correct for the state part. 2,900 withheld in Box 17 minus 2,602 of state tax leaves a 298 state refund. The city part comes next, on the same IT-201." }, { t: "Owes New York State $298", ok: false, why: "Direction matters. Their combined state withholding in Box 17 beat the state tax, so the state part comes back." }, { t: "Owes New York State $2,602", ok: false, why: "That forgets the 2,900 already withheld in Box 17. Withholding is a payment, and it is credited against the tax." } ] },
+            { line: "NYC Tax", label: "New York City tax · Box 20 withholding credited", prompt: "The Patels lived in New York City all year, so there is a city tax on top of the state tax. On the same 53,350 of taxable income, the New York City tax is 1,864. Their W-2 forms carry the city withholding in their local boxes: Samir Box 19 local wages 41,000, Box 20 withheld 720; Priya Box 19 local wages 28,400, Box 20 withheld 500, locality New York, NY on both. Credit the Box 20 city withholding, add it to the state part, and finish the whole New York return.", help: "Total New York tax is 2,602 state plus 1,864 city, which is 4,466. Total New York withholding is 2,900 in Box 17 plus 1,220 in Box 20, which is 4,120.", hint: "City part first: 1,864 minus the 1,220 credited from Box 20 is 644 owed to the city. Then offset the 298 state refund.",
+              options: [ { t: "Owes New York $346 in total", ok: true, why: "Correct. The Box 20 city withholding of 1,220 is credited against the 1,864 city tax, leaving 644 owed to the city. Offset the 298 state refund and the whole New York return balances at 346 owed: total tax 4,466 minus total withholding 4,120." }, { t: "New York refund of $298 in total", ok: false, why: "That is the state part only. It leaves out the city tax, and it never credits the 1,220 of city tax withheld in Box 20 on the two W-2 forms." }, { t: "Owes New York $644 in total", ok: false, why: "That is the city part only. It forgets the 298 state refund from the state part of the same IT-201." } ] }
+          ],
+          result: { amount: 4629, stateAmount: -346, stateLabel: "New York (State + City)", lesson: "On a joint return, both incomes combine and both withholdings combine. The interview question that runs the whole case is simple: did your spouse work too? Train yourself to ask it every single time. New York then ran in two parts. The state part: tax 2,602 on the smaller 16,050 dollar joint deduction, minus 2,900 withheld in Box 17, was a 298 dollar state refund. The city part: New York City tax 1,864, minus the 1,220 of city tax withheld in Box 20 on the two W-2 forms (Samir 720 on local wages 41,000, Priya 500 on local wages 28,400, locality New York, NY), left 644 owed to the city. Net New York owed is 346, alongside the 4,629 dollar federal refund. Always read the local boxes at the bottom of every New York City W-2." }
+        },
+        {
+          id: "maya", type: "W-2 only · Florida", tier: 2, level: "Level 2 · No state income tax case", fee: 160,
+          name: "Maya Torres", tag: "Hotel front desk, one job · Florida", initials: "MT", color: "#b7791f",
+          story: "Maya works the front desk at a hotel in Orlando and lived in Florida all year. Her cousin in New York keeps asking about her state refund. Maya wants to know if she missed a Florida form, or if Florida really works differently.",
+          docs: [
+            { title: "Form W-2", sub: "Tax Year 2025", rows: [["Employer", "Sun Coast Hotel"], ["Box 1 · Wages", "$31,200"], ["Box 2 · Federal tax withheld", "$2,150"], ["Box 16 · State wages (FL)", "$31,200"], ["Box 17 · State tax withheld", "$0"]] }
+          ],
+          decoy: { title: "Form W-2", sub: "Tax Year 2025 · LAST YEAR", rows: [["Employer", "Sun Coast Hotel"], ["Box 1 · Wages", "$29,400"], ["Box 2 · Federal tax withheld", "$1,980"]] },
+          asks: [
+            { prompt: "State residency decides whether a state return exists at all. Ask it cleanly.",
+              speech: "I lived in Orlando the whole year. Do I still file a Florida return like my cousin does in New York?",
+              options: [
+                { t: "Did you live or work in any other state during the year?", ok: true, why: "Right question. A part year move or work in a taxing state can create a filing duty even for a Florida resident. Maya has neither." },
+                { t: "What is your cousin's refund amount?", ok: false, why: "Her cousin files in New York, a state with an income tax. That tells you nothing about Florida." },
+                { t: "Do you want me to file a Florida return anyway, just in case?", ok: false, why: "There is no Florida personal income tax return to file. Filing one is not a safety step." }
+              ],
+              reveal: { fact: "Florida resident all year. Lived and worked only in Florida" } },
+            { prompt: "One job on paper. Confirm the year is really that simple.",
+              speech: "Just the hotel. Same desk, same schedule, all year.",
+              options: [
+                { t: "Any other income this year: a second job, side work, bank interest, anything with a form?", ok: true, why: "Correct. The state answer does not end the federal interview. Other income still belongs on the 1040." },
+                { t: "Do guests tip well at the hotel?", ok: false, why: "Tips are income if she received them, but small talk about guests is not the trained question. Ask about income sources directly." },
+                { t: "Can we skip to the refund screen?", ok: false, why: "Not before the interview is complete. Completeness comes first." }
+              ],
+              reveal: { fact: "One job only. No other income forms" } },
+            { prompt: "Her W-2 shows zero state withholding. Check what that zero means.",
+              speech: "Box 17 says zero. Did my job forget to take out Florida tax?",
+              options: [
+                { t: "That zero is expected if Florida has no state income tax to withhold. Did any other state withhold tax for you this year?", ok: true, why: "Exactly. Box 17 is zero because there is no Florida income tax withholding, and no other state withheld for her either." },
+                { t: "Yes, your employer made a mistake. We should report it.", ok: false, why: "No mistake happened. Florida employers do not withhold a state income tax that does not exist." },
+                { t: "Zero withholding means you owe Florida the full tax now.", ok: false, why: "There is no Florida personal income tax bill waiting at the end. The federal return is the return here." }
+              ],
+              reveal: { fact: "Box 17 is $0 on purpose: no Florida income tax withholding, and no other state withholding" } }
+          ],
+          steps: [
+            { line: "Status", label: "Filing status", prompt: "Set the filing status.", help: "Single all year, lives alone, no dependents.", hint: "Single.",
+              options: [ { t: "Single", ok: true, why: "Correct." }, { t: "Head of Household", ok: false, why: "No qualifying person lives with Maya." }, { t: "Married Filing Jointly", ok: false, why: "Maya was not married this year." } ] },
+            { line: "1a", label: "Total amount from Form W-2, Box 1", prompt: "Line 1a: enter the wages.", help: "Hotel W-2, Box 1.", hint: "Box 1, not Box 17. Box 17 is the state withholding line, and it is zero here.",
+              options: [ { t: "$31,200", ok: true, why: "Right. Box 1 goes to Line 1a." }, { t: "$2,150", ok: false, why: "That is Box 2, federal tax already withheld." }, { t: "$0", ok: false, why: "That is Box 17. Florida withheld no state tax, but Maya still earned wages." } ] },
+            { line: "12", label: "Standard deduction", prompt: "Line 12: the standard deduction.", help: "Tax year 2025 standard deduction for a single filer under current federal law.", hint: "Single filers get 15,750 in this training year.",
+              options: [ { t: "$15,750", ok: true, why: "Correct for Single in 2025." }, { t: "$23,625", ok: false, why: "That is the Head of Household amount." }, { t: "$3,250", ok: false, why: "That is Delaware's single standard deduction. Maya has no Delaware return, and the federal deduction is its own number." } ] },
+            { line: "15", label: "Taxable income", prompt: "Line 15: taxable income.", help: "31,200 minus 15,750.", hint: "Total income minus the deduction.",
+              options: [ { t: "$15,450", ok: true, why: "Right." }, { t: "$31,200", ok: false, why: "That skips the deduction." }, { t: "$27,950", ok: false, why: "That subtracts Delaware's 3,250 by mistake. This step is the federal return: 31,200 minus 15,750." } ] },
+            { line: "16", label: "Tax", prompt: "Line 16: figure the federal tax.", help: "Game Tax Table for Single: the first 11,925 at 10 percent is 1,193. The remaining 3,525 at 12 percent is 423.", hint: "1,193 plus 423.",
+              options: [ { t: "$1,616", ok: true, why: "Correct. That is the federal tax. There is no second, Florida tax bill added to it." }, { t: "$1,545", ok: false, why: "That is a flat 10 percent. Income above the first bracket pays 12 percent." }, { t: "$1,193", ok: false, why: "That is only the first bracket." } ] },
+            { line: "25a", label: "Federal income tax withheld from W-2", prompt: "Line 25a: enter the withholding.", help: "Federal withholding is Box 2 of the W-2.", hint: "Box 2. Box 17 being zero does not change the federal payment.",
+              options: [ { t: "$2,150", ok: true, why: "Right. Her employer withheld federal tax all year, even though Florida withheld no state tax." }, { t: "$0", ok: false, why: "That is the state line, Box 17. Federal withholding is Box 2, and it is 2,150." }, { t: "$1,616", ok: false, why: "That is the tax from Line 16, not a payment." } ] },
+            { line: "34", label: "Overpayment · refund", prompt: "Withholding is 2,150 and the federal tax is 1,616. What lands on Line 34?", help: "When federal payments beat the federal tax, the IRS refunds the difference.", hint: "2,150 minus 1,616.",
+              options: [ { t: "Refund of $534", ok: true, why: "Correct. This is a federal refund only. There is no separate Florida refund coming." }, { t: "Refund of $2,150", ok: false, why: "That refunds every dollar and forgets the 1,616 of federal tax." }, { t: "Owes $534", ok: false, why: "She overpaid the federal tax, so money comes back." } ] },
+            { line: "FL", label: "Florida · Florida has no state income tax", prompt: "Now the state question this whole case was built for: Maya lived and worked in Florida all year. Florida has no state income tax. What Florida state income tax return does she file for 2025?", help: "Florida has no state income tax. Wage earners there do not file a state income tax return, because there is no state income tax to report.", hint: "Florida has no state income tax, so there is no state income tax return, no Florida standard deduction, and no Box 17 withholding.",
+              options: [ { t: "No Florida income tax return to file · Florida has no state income tax", ok: true, why: "Correct. Florida has no state income tax, so Florida does not tax her wages, there is no state return to file, no state deduction to pick, and no state refund or balance due on her wages." }, { t: "A Florida return using the $3,250 standard deduction", ok: false, why: "That 3,250 amount is Delaware's. Delaware taxes income; Florida has no state income tax. The two states are opposites on this point." }, { t: "Form IT-201, like New York", ok: false, why: "IT-201 is New York's resident return. Maya never lived or worked in New York, and Florida has no state income tax return like it." } ] },
+            { line: "FL Tax", label: "Florida · no state income tax · result", prompt: "Finish the state lesson. Florida has no state income tax. Florida does charge a statewide sales tax of 6 percent, and counties can add their own surtax on top, but sales tax is not income tax. Delaware charges no sales tax at all, but it does tax income. For Maya's wages, what is the Florida result?", help: "Florida has no state income tax: state income tax is $0 because the tax does not exist, state withholding is $0, and there is no state income tax return to file. Do not confuse the federal refund with a state one.", hint: "Florida has no state income tax. Zero tax and zero withholding here mean no tax exists, not a refund.",
+              options: [ { t: "Florida has no state income tax · $0 · nothing to file, nothing owed", ok: true, why: "Correct. Florida has no state income tax. That does not mean no taxes at all: Florida collects sales tax when she shops. Delaware flips the pattern, with no sales tax and a real income tax. Naming which tax a state skips is a trained preparer habit." }, { t: "Florida refund of $534", ok: false, why: "That 534 is her federal refund. Florida has no state income tax, so Florida sends no state refund, because Florida collected no state income tax." }, { t: "Owes Florida $1,616", ok: false, why: "That is her federal tax bill before payments. Florida has no state income tax, so Florida does not add an income tax on top of it." } ] }
+          ],
+          result: { amount: 534, stateAmount: 0, stateLabel: "Florida", lesson: "Florida has no state income tax. That is the whole state lesson of this case: Florida has no state income tax, so there is no state income tax return for a wage earner, no state standard deduction, and a zero in Box 17 that is correct, not an employer mistake. Her $534 result shown for Florida is $0 because Florida has no state income tax, not because a Florida tax was paid down to zero. Delaware is the mirror image, no sales tax but a real income tax with its own return. Keep those two straight and you will never promise a client a tax free state that is only sales tax free." }
+        }
+        ,
+        {
+          id: "chris", type: "Side gig · Schedule C", tier: 3, level: "Level 3 · Side income case", fee: 200,
+          name: "Chris Alvarez", tag: "Warehouse job plus weekend driving · Delaware", initials: "CA", color: "#7a4a8c",
+          story: "Chris has a warehouse W-2 and a confident smile. Somewhere in this interview is income with no boss and no withholding. Your training says: always ask about the side work.",
+          docs: [
+            { title: "Form W-2", sub: "Tax Year 2025", rows: [["Employer", "Northgate Warehouse"], ["Box 1 · Wages", "$32,000"], ["Box 2 · Federal tax withheld", "$2,400"], ["Box 16 · State wages (DE)", "$32,000"], ["Box 17 · State tax withheld", "$1,100"]] }
+          ],
+          decoy: { title: "Form W-2", sub: "Tax Year 2025 · LAST YEAR", rows: [["Employer", "Northgate Warehouse"], ["Box 1 · Wages", "$29,750"], ["Box 2 · Federal tax withheld", "$2,120"]] },
+          asks: [
+            { prompt: "The W-2 looks complete. A trained preparer asks one more thing.",
+              speech: "That is my whole year right there. Warehouse, forty hours a week.",
+              options: [
+                { t: "Any work outside this job? Weekends, apps, anything on the side?", ok: true, why: "There it is. Side income is the most missed item in the business, and it only surfaces when you ask." },
+                { t: "Great, let us file it right now.", ok: false, why: "Fast is not the same as right. The interview is not finished." },
+                { t: "Do you like the warehouse?", ok: false, why: "Small talk. The return needs facts about income." }
+              ],
+              reveal: { fact: "Weekend delivery app driving. Form 1099-NEC for $8,000",
+                doc: { title: "Form 1099-NEC", sub: "Tax Year 2025", rows: [["Payer", "Delivery app platform"], ["Box 1 · Nonemployee compensation", "$8,000"]] } } },
+            { prompt: "Business income means business costs. Ask about them.",
+              speech: "The app paid me 8,000. Gas ate a chunk of it though.",
+              options: [
+                { t: "What did the side work cost you? Gas, phone, supplies, with receipts?", ok: true, why: "Correct. Expenses reduce business income on Schedule C, and receipts are what make them real." },
+                { t: "Did you enjoy the driving?", ok: false, why: "Enjoyment is not deductible. Documented costs are." },
+                { t: "Can we just skip the app income? It is small.", ok: false, why: "Never. The IRS gets a copy of that 1099-NEC. Skipping it guarantees a letter." }
+              ],
+              reveal: { fact: "Kept receipts: $2,000 of business expenses" } },
+            { prompt: "Final interview check on the app pay.",
+              speech: "The app just sent the money. Every week, straight to my account.",
+              options: [
+                { t: "Did the app take any tax out of that pay before sending it?", ok: true, why: "The key question for all 1099 income. No boss means no withholding, and that changes the ending of this return." },
+                { t: "What rating do riders give you?", ok: false, why: "Ratings do not appear on a 1040." },
+                { t: "Do you drive at night?", ok: false, why: "Schedule does not matter. Withholding does." }
+              ],
+              reveal: { fact: "No tax was withheld from the app pay" } }
+          ],
+          steps: [
+            { line: "Status", label: "Filing status", prompt: "Set the filing status.", help: "Single, lives alone, no dependents mentioned or found.", hint: "Single.",
+              options: [ { t: "Single", ok: true, why: "Correct." }, { t: "Head of Household", ok: false, why: "No qualifying person lives with Chris." }, { t: "Married Filing Jointly", ok: false, why: "Chris is not married." } ] },
+            { line: "1a", label: "Total amount from Form W-2, Box 1", prompt: "Line 1a: the W-2 wages only.", help: "The warehouse W-2, Box 1. The app income gets its own line.", hint: "Line 1a is W-2 wages. Business income goes on Line 3.",
+              options: [ { t: "$32,000", ok: true, why: "Right. Wages on 1a, business income on its own line." }, { t: "$40,000", ok: false, why: "That mixes the app pay into wages. Different income, different line." }, { t: "$8,000", ok: false, why: "That is the app pay. Line 1a is the W-2." } ] },
+            { line: "3", label: "Business income from Schedule C", prompt: "Line 3: net business income from Schedule C.", help: "The app paid 8,000 and the documented expenses were 2,000.", hint: "8,000 minus 2,000 of expenses.",
+              options: [ { t: "$6,000", ok: true, why: "Correct. Schedule C taxes the profit, not the gross." }, { t: "$8,000", ok: false, why: "That taxes money Chris spent on gas and supplies to earn it. Expenses come off." }, { t: "$2,000", ok: false, why: "That is the expenses alone. The line wants pay minus expenses." } ] },
+            { line: "9", label: "Total income", prompt: "Line 9: total income.", help: "Wages 32,000 plus business profit 6,000.", hint: "Add Lines 1a and 3.",
+              options: [ { t: "$38,000", ok: true, why: "Right." }, { t: "$40,000", ok: false, why: "That uses the gross app pay instead of the profit." }, { t: "$32,000", ok: false, why: "That drops the side income the interview worked to find." } ] },
+            { line: "12", label: "Standard deduction", prompt: "Line 12: the standard deduction.", help: "Tax year 2025 amount for Single.", hint: "15,750 for Single.",
+              options: [ { t: "$15,750", ok: true, why: "Correct." }, { t: "$23,625", ok: false, why: "That is Head of Household." }, { t: "$31,500", ok: false, why: "That is the joint amount." } ] },
+            { line: "15", label: "Taxable income", prompt: "Line 15: taxable income.", help: "38,000 minus 15,750.", hint: "Total income minus the deduction.",
+              options: [ { t: "$22,250", ok: true, why: "Right." }, { t: "$38,000", ok: false, why: "That skips the deduction." }, { t: "$25,400", ok: false, why: "Check the math: 38,000 minus 15,750 is 22,250." } ] },
+            { line: "16", label: "Tax", prompt: "Line 16: figure the tax.", help: "Game Tax Table for Single: the first 11,925 at 10 percent is 1,193. The remaining 10,325 at 12 percent is 1,239.", hint: "1,193 plus 1,239.",
+              options: [ { t: "$2,432", ok: true, why: "Correct." }, { t: "$2,225", ok: false, why: "That is a flat 10 percent. The second bracket pays 12 percent." }, { t: "$1,193", ok: false, why: "That is only the first bracket." } ] },
+            { line: "25a", label: "Federal income tax withheld from W-2", prompt: "Line 25a: the withholding.", help: "Only one of Chris's two income sources withheld tax. Which one, and how much?", hint: "The W-2, Box 2. The app withheld nothing.",
+              options: [ { t: "$2,400", ok: true, why: "Right. The warehouse withheld 2,400. The app withheld zero." }, { t: "$3,200", ok: false, why: "That invents withholding on the app pay. There was none, and that is the whole lesson of this case." }, { t: "$2,432", ok: false, why: "That is the tax, not the withholding." } ] },
+            { line: "37", label: "Amount you owe", prompt: "Tax is 2,432 and payments are 2,400. What lands on Line 37?", help: "When the tax beats the payments, the client owes the difference.", hint: "2,432 minus 2,400, and it is owed, not refunded.",
+              options: [ { t: "Owes $32", ok: true, why: "Correct. A small balance due, caused entirely by income with no withholding." }, { t: "Refund of $32", ok: false, why: "The direction is wrong. Chris paid in less than the tax." }, { t: "Owes $432", ok: false, why: "Check the subtraction: 2,432 minus 2,400 is 32." } ] },
+            { line: "DE", label: "Delaware return · standard deduction", prompt: "Now the Delaware return. Delaware is famous for having no sales tax, but it does tax income. Which standard deduction does Delaware give a single filer for 2025?", help: "Delaware's standard deduction is 3,250 for Single and 6,500 for joint filers.", hint: "Delaware Single is 3,250.",
+              options: [ { t: "$3,250", ok: true, why: "Correct. No sales tax does not mean no income tax. Delaware taxes income with a small standard deduction and rates from 2.2 to 6.6 percent." }, { t: "$15,750", ok: false, why: "That is the federal amount. Delaware uses its own, much smaller one." }, { t: "$0 · Delaware is tax free", ok: false, why: "A common myth. Delaware has no sales tax, but wages and business profit are taxed. Chris owes a Delaware return." } ] },
+            { line: "DE Tax", label: "Delaware tax and result", prompt: "Delaware taxable income is 38,000 minus 3,250, which is 34,750. Delaware's brackets put the tax at 1,542, and after the 110 dollar Delaware personal credit it is 1,432. Only the warehouse job withheld Delaware tax: 1,100 in Box 17. The app withheld nothing, again. Finish the state return.", help: "State tax of 1,432 against state withholding of 1,100.", hint: "1,432 minus 1,100, and it is owed.",
+              options: [ { t: "Owes Delaware $332", ok: true, why: "Correct. The same side gig that caused the federal balance due causes a bigger state one. One bright spot: Delaware charged him no sales tax on the supplies he bought for the work." }, { t: "Delaware refund of $332", ok: false, why: "The state tax beat the state withholding. He owes." }, { t: "Owes Delaware $32", ok: false, why: "That is the federal balance due. The Delaware bill is separate, and bigger." } ] }
+          ],
+          result: { amount: -32, stateAmount: -332, stateLabel: "Delaware", lesson: "A 1099 means nobody withheld tax along the way. Skip the side work question in the interview and the return looks fine until the IRS letter arrives months later. This is why trained preparers ask about weekends. Delaware then billed him 332 dollars more on the same profit, because the app withheld no state tax either. No sales tax in Delaware never meant no income tax." }
+        },
+        {
+          id: "dana", type: "Homeowner · Schedule A", tier: 3, level: "Level 3 · Homeowner case", fee: 240,
+          name: "Dana Whitfield", tag: "Homeowner, design studio job · New Jersey", initials: "DW", color: "#a3543a",
+          story: "Dana bought a home a few years back and brings a W-2 plus a bank form with a similar name to the tuition form. Careful: Form 1098 is mortgage interest. Form 1098-T is tuition. Different forms, different returns.",
+          docs: [
+            { title: "Form W-2", sub: "Tax Year 2025", rows: [["Employer", "Harbor Design Studio"], ["Box 1 · Wages", "$68,000"], ["Box 2 · Federal tax withheld", "$7,200"], ["Box 16 · State wages (NJ)", "$68,000"], ["Box 17 · State tax withheld", "$2,400"]] }
+          ],
+          decoy: { title: "Form 1098", sub: "Tax Year 2025 · LAST YEAR", rows: [["Recipient", "Harbor Bank"], ["Box 1 · Mortgage interest received", "$12,900"]] },
+          asks: [
+            { prompt: "Housing changes a return. Ask about it directly.",
+              speech: "I bought my place back in 2021. The bank sends me a form every January.",
+              options: [
+                { t: "Do you own your home, and did the bank send you a Form 1098 for the mortgage?", ok: true, why: "Right. Form 1098 is the mortgage interest statement, and it opens the door to Schedule A." },
+                { t: "How many bedrooms does it have?", ok: false, why: "Bedrooms do not appear on Schedule A. Mortgage interest does." },
+                { t: "Renters and owners file the same, so let us move on.", ok: false, why: "They do not. Homeownership is one of the biggest forks in a return." }
+              ],
+              reveal: { fact: "Homeowner. Form 1098 reports $13,800 of mortgage interest",
+                doc: { title: "Form 1098", sub: "Mortgage Interest Statement · 2025", rows: [["Recipient", "Harbor Bank"], ["Box 1 · Mortgage interest received", "$13,800"], ["Box 2 · Outstanding principal", "$212,400"], ["Box 5 · Mortgage insurance premiums", "$0"]] } } },
+            { prompt: "Mortgage interest is not the only home cost on Schedule A.",
+              speech: "The county sends me a tax bill for the house too. It is not small.",
+              options: [
+                { t: "How much was the property tax bill on the home this year?", ok: true, why: "Correct. Real estate taxes are a Schedule A item, and they stack with mortgage interest." },
+                { t: "Do you like the neighborhood?", ok: false, why: "Not a Schedule A question." },
+                { t: "What did you pay for the house originally?", ok: false, why: "Purchase price matters when she sells, not for this deduction." }
+              ],
+              reveal: { fact: "County property tax bill: $5,200",
+                doc: { title: "Property Tax Bill", sub: "County Tax Office · 2025", rows: [["Property", "Dana Whitfield residence"], ["Real estate taxes paid", "$5,200"]] } } },
+            { prompt: "Round out the Schedule A picture.",
+              speech: "Other than the house costs, nothing big this year. No major medical bills.",
+              options: [
+                { t: "Any large charitable giving, medical bills, or other Schedule A items?", ok: true, why: "Right. You total everything Schedule A offers before you compare it to the standard deduction." },
+                { t: "Should we just take the standard deduction and skip all this?", ok: false, why: "Not before you run the numbers. That comparison is the job." },
+                { t: "Did you repaint this year?", ok: false, why: "Home upkeep is not a Schedule A item for a personal home." }
+              ],
+              reveal: { fact: "No other Schedule A items. The home costs carry the schedule" } }
+          ],
+          steps: [
+            { line: "Status", label: "Filing status", prompt: "Set the filing status.", help: "Single, no dependents.", hint: "Single.",
+              options: [ { t: "Single", ok: true, why: "Correct." }, { t: "Head of Household", ok: false, why: "Owning a home alone does not create Head of Household. A qualifying person does." }, { t: "Married Filing Jointly", ok: false, why: "Dana is not married." } ] },
+            { line: "1a", label: "Total amount from Form W-2, Box 1", prompt: "Line 1a: the wages.", help: "Design studio W-2, Box 1.", hint: "Box 1.",
+              options: [ { t: "$68,000", ok: true, why: "Right." }, { t: "$7,200", ok: false, why: "That is Box 2 withholding." }, { t: "$13,800", ok: false, why: "That is mortgage interest from Form 1098. It is a deduction item, not income." } ] },
+            { line: "Sch A", label: "Schedule A · itemized deductions total", prompt: "Build Schedule A: total the itemized deductions.", help: "Mortgage interest from Form 1098 Box 1, plus the property taxes paid. For tax year 2025 the state and local tax deduction cap is 40,000, so her full property tax counts.", hint: "13,800 plus 5,200.",
+              options: [ { t: "$19,000", ok: true, why: "Correct. Interest and property tax together." }, { t: "$13,800", ok: false, why: "That drops the property tax you asked about in the interview." }, { t: "$5,200", ok: false, why: "That is only the property tax. The mortgage interest is the bigger item." } ] },
+            { line: "12", label: "Deduction used on Line 12", prompt: "Line 12 decision: standard deduction or itemize?", help: "Standard for Single is 15,750 in 2025. Her Schedule A total is 19,000. Line 12 takes the bigger number.", hint: "Compare 19,000 to 15,750 and take the winner.",
+              options: [ { t: "Itemize: $19,000", ok: true, why: "Correct. Itemizing beats the standard deduction by 3,250, and every dollar of it cuts taxable income." }, { t: "Standard: $15,750", ok: false, why: "That leaves 3,250 of deductions unused. Always run both numbers." }, { t: "Both: $33,600", ok: false, why: "Never both. Line 12 is one deduction or the other." } ] },
+            { line: "15", label: "Taxable income", prompt: "Line 15: taxable income.", help: "68,000 minus the 19,000 itemized deduction.", hint: "Use the itemized number you just chose.",
+              options: [ { t: "$49,000", ok: true, why: "Right." }, { t: "$52,250", ok: false, why: "That uses the standard deduction. She itemized." }, { t: "$68,000", ok: false, why: "That skips the deduction entirely." } ] },
+            { line: "16", label: "Tax", prompt: "Line 16: figure the tax.", help: "Game Tax Table for Single: 10 percent of the first 11,925 is 1,192.50. 12 percent of the next 36,550 is 4,386. 22 percent of the last 525 is 115.50.", hint: "Add the three bracket pieces: 1,192.50 plus 4,386 plus 115.50.",
+              options: [ { t: "$5,694", ok: true, why: "Correct. Three brackets, one total." }, { t: "$4,900", ok: false, why: "That is a flat 10 percent. Higher income crosses into higher brackets." }, { t: "$5,579", ok: false, why: "That stops after two brackets. The last 525 is taxed at 22 percent." } ] },
+            { line: "25a", label: "Federal income tax withheld from W-2", prompt: "Line 25a: the withholding.", help: "Box 2 of the W-2.", hint: "Box 2.",
+              options: [ { t: "$7,200", ok: true, why: "Right." }, { t: "$5,694", ok: false, why: "That is the tax." }, { t: "$68,000", ok: false, why: "That is wages." } ] },
+            { line: "34", label: "Overpayment · refund", prompt: "She paid in 7,200 against a tax of 5,694. What lands on Line 34?", help: "Payments minus tax.", hint: "7,200 minus 5,694.",
+              options: [ { t: "Refund of $1,506", ok: true, why: "Correct." }, { t: "Refund of $1,833", ok: false, why: "Check the subtraction: 7,200 minus 5,694 is 1,506." }, { t: "Owes $1,506", ok: false, why: "She overpaid. The money comes back." } ] },
+            { line: "NJ", label: "New Jersey NJ-1040 · property tax deduction", prompt: "Now the New Jersey return, where homeowners get their own break: property taxes paid can be deducted on the NJ-1040, up to 15,000. Dana paid 5,200. What does New Jersey let her deduct?", help: "This is a New Jersey rule, separate from federal Schedule A.", hint: "Her full bill is under the 15,000 cap.",
+              options: [ { t: "$5,200", ok: true, why: "Correct. The full property tax bill, under the cap. New Jersey homeowners get this deduction even on top of the federal decision." }, { t: "$19,000", ok: false, why: "That is her federal Schedule A total, mortgage interest included. On the New Jersey return, this line takes the property tax piece." }, { t: "$0", ok: false, why: "Owners who paid property tax get this deduction in New Jersey. It is one of the state's biggest homeowner breaks." } ] },
+            { line: "NJ Tax", label: "New Jersey tax and result", prompt: "New Jersey taxable income is 68,000 minus her 1,000 exemption and the 5,200 property tax deduction, which is 61,800. Working through New Jersey's brackets from 1.4 percent up, the tax is 1,922. Her W-2 Box 17 shows 2,400 of New Jersey tax withheld. Finish the state return.", help: "State tax of 1,922 against state withholding of 2,400.", hint: "2,400 minus 1,922.",
+              options: [ { t: "New Jersey refund of $478", ok: true, why: "Correct. The property tax deduction helped on both returns: Schedule A federally, and its own line in New Jersey." }, { t: "Owes New Jersey $478", ok: false, why: "Her state withholding covered the state tax." }, { t: "New Jersey refund of $1,506", ok: false, why: "That is the federal refund. The state result is smaller and separate." } ] }
+          ],
+          result: { amount: 1506, stateAmount: 478, stateLabel: "New Jersey", lesson: "Homeowners face a choice most renters never see. Form 1098 reports the mortgage interest, and when interest plus property tax beats the standard deduction, Schedule A wins. The trained move is boring and powerful: always run both numbers. In New Jersey her property tax worked twice, once inside federal Schedule A and again as the NJ-1040 property tax deduction, bringing a 478 dollar state refund." }
+        },
+        {
+          id: "nguyen", type: "Family · two credit ages", tier: 3, level: "Level 4 · Credit ages case", fee: 260,
+          name: "The Nguyen Family", tag: "Two jobs, two kids, two different credits · New York City", initials: "NF", color: "#3a6ea5",
+          story: "Two working parents in New York City, a twelve year old son, and a nineteen year old daughter in college. They live and work in the city, so both W-2 forms carry New York City tax withheld in their local boxes, and the New York return has a city part as well as a state part. Same house, same last name, two completely different credit answers. Ages run this return.",
+          docs: [
+            { title: "Form W-2 · David", sub: "Tax Year 2025", rows: [["Employer", "City Schools"], ["Box 1 · Wages", "$36,000"], ["Box 2 · Federal tax withheld", "$3,100"], ["Box 16 · State wages (NY)", "$36,000"], ["Box 17 · State tax withheld", "$1,300"], ["Box 19 · Local wages", "$36,000"], ["Box 20 · Local income tax withheld", "$650"], ["Locality", "New York, NY"]] },
+            { title: "Form W-2 · Linh", sub: "Tax Year 2025", rows: [["Employer", "River Clinic"], ["Box 1 · Wages", "$22,000"], ["Box 2 · Federal tax withheld", "$2,100"], ["Box 16 · State wages (NY)", "$22,000"], ["Box 17 · State tax withheld", "$900"], ["Box 19 · Local wages", "$22,000"], ["Box 20 · Local income tax withheld", "$400"], ["Locality", "New York, NY"]] }
+          ],
+          decoy: { title: "Form W-2 · Linh", sub: "Tax Year 2025 · LAST YEAR", rows: [["Employer", "River Clinic"], ["Box 1 · Wages", "$20,400"], ["Box 2 · Federal tax withheld", "$1,880"]] },
+          asks: [
+            { prompt: "Two kids can mean two different credits. What decides it?",
+              speech: "Our son is twelve. Our daughter just started college across town.",
+              options: [
+                { t: "How old is each child, and is your oldest in school full time?", ok: true, why: "Exactly. Age 17 is the Child Tax Credit line, and full time student status keeps an older child a dependent." },
+                { t: "Do both kids have the same last name?", ok: false, why: "Names do not set credits. Ages and student status do." },
+                { t: "Which child costs more?", ok: false, why: "Cost is not the test. Age is." }
+              ],
+              reveal: { fact: "Son age 12. Daughter age 19, full time college student, lives at home" } },
+            { prompt: "An older child stays a dependent only if the support test holds.",
+              speech: "She works a few hours at the campus bookstore, that is all.",
+              options: [
+                { t: "Does your daughter support herself, or do you cover her living costs?", ok: true, why: "Right. A few campus hours do not outrun parental support. She remains their dependent." },
+                { t: "Does she like college?", ok: false, why: "Not a tax test." },
+                { t: "Can she file her own return for a bigger refund?", ok: false, why: "A dependent files her own return for her own wages, but she cannot claim herself. The parents claim her here." }
+              ],
+              reveal: { fact: "Parents provide her support. She is still their dependent" } },
+            { prompt: "Last document sweep for this family.",
+              speech: "There were a couple of small bank forms too. Interest and something from an investment account.",
+              options: [
+                { t: "Did you get a 1099-INT for interest and a 1099-DIV for dividends?", ok: true, why: "Correct. Two small forms, two income lines, both belong on the return." },
+                { t: "Small forms can be skipped, right?", ok: false, why: "No form with the IRS copied on it is ever safe to skip." },
+                { t: "What is your bank balance?", ok: false, why: "Balances are not taxed. Interest and dividends are." }
+              ],
+              reveal: { fact: "1099-INT shows $500 interest. 1099-DIV shows $500 dividends",
+                doc: { title: "Forms 1099-INT and 1099-DIV", sub: "Tax Year 2025", rows: [["1099-INT Box 1 · Interest", "$500"], ["1099-DIV Box 1a · Ordinary dividends", "$500"]] } } }
+          ],
+          steps: [
+            { line: "Status", label: "Filing status", prompt: "Set the filing status.", help: "Married, filing together.", hint: "Married Filing Jointly.",
+              options: [ { t: "Married Filing Jointly", ok: true, why: "Correct." }, { t: "Head of Household", ok: false, why: "They are married and living together." }, { t: "Single", ok: false, why: "They are married." } ] },
+            { line: "1a", label: "Total amount from both W-2 forms, Box 1", prompt: "Line 1a: combined wages.", help: "36,000 plus 22,000.", hint: "Add both Box 1 amounts.",
+              options: [ { t: "$58,000", ok: true, why: "Right." }, { t: "$36,000", ok: false, why: "That is only David." }, { t: "$59,000", ok: false, why: "That includes the interest and dividends. Line 1a is wages only." } ] },
+            { line: "9", label: "Total income", prompt: "Line 9: total income.", help: "Wages 58,000, plus interest 500, plus dividends 500.", hint: "58,000 plus 500 plus 500.",
+              options: [ { t: "$59,000", ok: true, why: "Correct." }, { t: "$58,000", ok: false, why: "That drops the two small forms." }, { t: "$58,500", ok: false, why: "That counts only one of the two 500 dollar items." } ] },
+            { line: "12", label: "Standard deduction", prompt: "Line 12: the standard deduction.", help: "Tax year 2025 amount for Married Filing Jointly.", hint: "31,500 for joint filers.",
+              options: [ { t: "$31,500", ok: true, why: "Correct." }, { t: "$15,750", ok: false, why: "That is Single." }, { t: "$23,625", ok: false, why: "That is Head of Household." } ] },
+            { line: "15", label: "Taxable income", prompt: "Line 15: taxable income.", help: "59,000 minus 31,500.", hint: "Total income minus the joint deduction.",
+              options: [ { t: "$27,500", ok: true, why: "Right." }, { t: "$59,000", ok: false, why: "That skips the deduction." }, { t: "$30,800", ok: false, why: "Check the math: 59,000 minus 31,500 is 27,500." } ] },
+            { line: "16", label: "Tax", prompt: "Line 16: figure the tax.", help: "Game Tax Table for joint filers: the first 23,850 at 10 percent is 2,385. The remaining 3,650 at 12 percent is 438.", hint: "2,385 plus 438.",
+              options: [ { t: "$2,823", ok: true, why: "Correct." }, { t: "$2,750", ok: false, why: "That is a flat 10 percent. The second bracket pays 12 percent." }, { t: "$2,385", ok: false, why: "That is only the first bracket." } ] },
+            { line: "19", label: "Child Tax Credit plus other dependent credits", prompt: "Line 19 area: total the dependent credits.", help: "Son is 12, so he earns the Child Tax Credit. Daughter is 19, so she earns the smaller Credit for Other Dependents.", hint: "2,200 for the twelve year old at the 2025 amount, 500 for the nineteen year old.",
+              options: [ { t: "$2,700", ok: true, why: "Correct. 2,200 plus 500. Same family, two ages, two credits." }, { t: "$4,400", ok: false, why: "That gives both children the full Child Tax Credit. The daughter aged out of it at 17." }, { t: "$2,200", ok: false, why: "That forgets the daughter entirely. Older dependents still earn 500." } ] },
+            { line: "24", label: "Total tax after credits", prompt: "Line 24: tax after credits.", help: "2,823 minus 2,700.", hint: "Tax minus total credits.",
+              options: [ { t: "$123", ok: true, why: "Right." }, { t: "$2,823", ok: false, why: "That ignores the credits." }, { t: "$1,112", ok: false, why: "Check the subtraction: 2,823 minus 2,700 is 123." } ] },
+            { line: "25", label: "Total withheld from both W-2 forms", prompt: "Line 25: total withholding.", help: "3,100 plus 2,100.", hint: "Add both Box 2 amounts.",
+              options: [ { t: "$5,200", ok: true, why: "Correct." }, { t: "$3,100", ok: false, why: "That is only David." }, { t: "$2,100", ok: false, why: "That is only Linh." } ] },
+            { line: "34", label: "Overpayment · refund", prompt: "They paid in 5,200 against a tax of 123. What lands on Line 34?", help: "Payments minus tax.", hint: "5,200 minus 123.",
+              options: [ { t: "Refund of $5,077", ok: true, why: "Correct." }, { t: "Refund of $5,200", ok: false, why: "That refunds everything and forgets the 123 of tax." }, { t: "Owes $123", ok: false, why: "Their payments cover the tax many times over." } ] },
+            { line: "NY", label: "New York IT-201 · standard deduction", prompt: "Now the family's New York return. Which standard deduction does New York give joint filers for 2025?", help: "Same New York joint amount as any married couple in the state.", hint: "16,050 for joint filers in New York.",
+              options: [ { t: "$16,050", ok: true, why: "Correct. New York's joint standard deduction is 16,050 for 2025." }, { t: "$31,500", ok: false, why: "That is the federal joint amount. New York's is about half." }, { t: "$11,300", ok: false, why: "That is New York's Head of Household amount. They file jointly." } ] },
+            { line: "NY Tax", label: "New York State tax", prompt: "New York taxable income is 59,000 minus 16,050, which is 42,950. Working through New York's brackets from 4 percent up, the state tax is 2,030. Their W-2 forms show 2,200 of New York State tax withheld in Box 17. How much state tax comes back, before the city part?", help: "State tax of 2,030 against state withholding of 2,200 in Box 17.", hint: "2,200 minus 2,030, and the withholding is bigger, so this part is a refund.",
+              options: [ { t: "New York State refund of $170", ok: true, why: "Correct for the state part. 2,200 withheld in Box 17 minus 2,030 of state tax leaves a 170 state refund. The city part comes next, on the same IT-201." }, { t: "Owes New York State $170", ok: false, why: "Direction matters. Their state withholding in Box 17 beat the state tax, so the state part comes back." }, { t: "Owes New York State $2,030", ok: false, why: "That forgets the 2,200 already withheld in Box 17. Withholding is a payment, and it is credited against the tax." } ] },
+            { line: "NYC Tax", label: "New York City tax · Box 20 withholding credited", prompt: "The Nguyens lived in New York City all year, so there is a city tax on top of the state tax. On the same 42,950 of taxable income, the New York City tax is 1,468. Their W-2 forms carry the city withholding in their local boxes: David Box 19 local wages 36,000, Box 20 withheld 650; Linh Box 19 local wages 22,000, Box 20 withheld 400, locality New York, NY on both. Credit the Box 20 city withholding, add it to the state part, and finish the whole New York return.", help: "Total New York tax is 2,030 state plus 1,468 city, which is 3,498. Total New York withholding is 2,200 in Box 17 plus 1,050 in Box 20, which is 3,250.", hint: "City part first: 1,468 minus the 1,050 credited from Box 20 is 418 owed to the city. Then offset the 170 state refund.",
+              options: [ { t: "Owes New York $248 in total", ok: true, why: "Correct. The Box 20 city withholding of 1,050 is credited against the 1,468 city tax, leaving 418 owed to the city. Offset the 170 state refund and the whole New York return balances at 248 owed: total tax 3,498 minus total withholding 3,250." }, { t: "New York refund of $170 in total", ok: false, why: "That is the state part only. It leaves out the city tax, and it never credits the 1,050 of city tax withheld in Box 20 on the two W-2 forms." }, { t: "Owes New York $418 in total", ok: false, why: "That is the city part only. It forgets the 170 state refund from the state part of the same IT-201." } ] }
+          ],
+          result: { amount: 5077, stateAmount: -248, stateLabel: "New York (State + City)", lesson: "Ages decide the credit. Under 17 is worth 2,200 dollars at the 2025 amount. An older dependent is worth 500. Same family, two different answers, and only the interview tells you which child gets which. New York then ran in two parts, through its own 16,050 dollar joint deduction. The state part: tax 2,030, minus 2,200 withheld in Box 17, was a 170 dollar state refund. The city part: New York City tax 1,468, minus the 1,050 of city tax withheld in Box 20 on the two W-2 forms (David 650 on local wages 36,000, Linh 400 on local wages 22,000, locality New York, NY), left 418 owed to the city. Net New York owed is 248, alongside the 5,077 dollar federal refund." }
+        },
+        {
+          id: "miller", type: "College · Form 1098-T", tier: 3, level: "Level 4 · Education credit case", fee: 280,
+          name: "Tom and Grace Miller", tag: "Parents of a college freshman · Delaware", initials: "TM", color: "#3f7a5e",
+          story: "The Millers paid college tuition this year for their daughter, a freshman. The college sent Form 1098-T, the tuition statement. Two education credits exist, they pay different amounts, and picking the right one is pure interview work.",
+          docs: [
+            { title: "Form W-2 · Tom", sub: "Tax Year 2025", rows: [["Employer", "Lakeside Manufacturing"], ["Box 1 · Wages", "$44,000"], ["Box 2 · Federal tax withheld", "$4,900"], ["Box 16 · State wages (DE)", "$44,000"], ["Box 17 · State tax withheld", "$2,000"]] },
+            { title: "Form W-2 · Grace", sub: "Tax Year 2025", rows: [["Employer", "County Library System"], ["Box 1 · Wages", "$31,000"], ["Box 2 · Federal tax withheld", "$3,100"], ["Box 16 · State wages (DE)", "$31,000"], ["Box 17 · State tax withheld", "$1,400"]] }
+          ],
+          decoy: { title: "Form 1098-T", sub: "Tax Year 2025 · LAST YEAR", rows: [["Institution", "State University"], ["Box 1 · Payments received", "$0"], ["Note", "Campus tour year. No tuition paid"]] },
+          asks: [
+            { prompt: "A daughter in college means a tuition form. Get it.",
+              speech: "Our daughter started at State University this fall. The school sent some form with a T on it.",
+              options: [
+                { t: "Is she in her first year, and did the college send a Form 1098-T for tuition?", ok: true, why: "Right. Form 1098-T is the tuition statement, and her year in school decides which credit fits." },
+                { t: "Is that the mortgage form?", ok: false, why: "No. Form 1098 is mortgage interest. Form 1098-T, with the T, is tuition. The letter changes everything." },
+                { t: "What is her major?", ok: false, why: "Major does not matter. Year of study and tuition paid do." }
+              ],
+              reveal: { fact: "Freshman year, first degree, enrolled full time",
+                doc: { title: "Form 1098-T", sub: "Tuition Statement · 2025", rows: [["Institution", "State University"], ["Box 1 · Payments received for tuition", "$12,000"], ["Box 5 · Scholarships or grants", "$0"], ["Box 7 · At least half time", "Yes"]] } } },
+            { prompt: "Scholarships shrink the credit base. Ask before you claim.",
+              speech: "We paid the bills ourselves. Every single one, I have the receipts.",
+              options: [
+                { t: "Did she receive scholarships or grants that paid part of the tuition?", ok: true, why: "Correct. Tax free scholarships reduce the expenses a credit can claim. Here there were none, so the full tuition counts." },
+                { t: "Can we claim the dorm and meal plan too?", ok: false, why: "Room and board do not count for these credits. Tuition and required fees do." },
+                { t: "Did she make the honor roll?", ok: false, why: "Grades do not set the credit. Enrollment and expenses do." }
+              ],
+              reveal: { fact: "No scholarships. The family paid the full tuition" } },
+            { prompt: "One eligibility check decides between the two credits.",
+              speech: "This is her first degree. She has never been in college before.",
+              options: [
+                { t: "Has she finished a degree before, or claimed an education credit in past years?", ok: true, why: "Right. The bigger credit is only for the first four years of college and can be claimed four times per student. She is clear on both." },
+                { t: "Does she plan to graduate on time?", ok: false, why: "Plans do not decide eligibility. History does." },
+                { t: "Should she claim the credit herself?", ok: false, why: "She is their dependent, so the parents claim the education credit on their return." }
+              ],
+              reveal: { fact: "First degree, no prior education credits. First four years rule is met" } }
+          ],
+          steps: [
+            { line: "Status", label: "Filing status", prompt: "Set the filing status.", help: "Married, filing together.", hint: "Married Filing Jointly.",
+              options: [ { t: "Married Filing Jointly", ok: true, why: "Correct." }, { t: "Head of Household", ok: false, why: "Married and living together means joint." }, { t: "Married Filing Separately", ok: false, why: "Separate filing blocks the education credits entirely. It would be a costly mistake here." } ] },
+            { line: "1a", label: "Total amount from both W-2 forms, Box 1", prompt: "Line 1a: combined wages.", help: "44,000 plus 31,000.", hint: "Add both Box 1 amounts.",
+              options: [ { t: "$75,000", ok: true, why: "Right." }, { t: "$44,000", ok: false, why: "That is only Tom." }, { t: "$87,000", ok: false, why: "That adds the tuition as income. Tuition paid is not income." } ] },
+            { line: "12", label: "Standard deduction", prompt: "Line 12: the standard deduction.", help: "Tax year 2025 amount for Married Filing Jointly.", hint: "31,500 for joint filers.",
+              options: [ { t: "$31,500", ok: true, why: "Correct." }, { t: "$15,750", ok: false, why: "That is Single." }, { t: "$23,625", ok: false, why: "That is Head of Household." } ] },
+            { line: "15", label: "Taxable income", prompt: "Line 15: taxable income.", help: "75,000 minus 31,500.", hint: "Total income minus the joint deduction.",
+              options: [ { t: "$43,500", ok: true, why: "Right." }, { t: "$75,000", ok: false, why: "That skips the deduction." }, { t: "$33,800", ok: false, why: "That subtracts the tuition as well. Tuition works through the credit, not the deduction." } ] },
+            { line: "16", label: "Tax", prompt: "Line 16: figure the tax.", help: "Game Tax Table for joint filers: the first 23,850 at 10 percent is 2,385. The remaining 19,650 at 12 percent is 2,358.", hint: "2,385 plus 2,358.",
+              options: [ { t: "$4,743", ok: true, why: "Correct." }, { t: "$4,350", ok: false, why: "That is a flat 10 percent. The second bracket pays 12 percent." }, { t: "$2,385", ok: false, why: "That is only the first bracket." } ] },
+            { line: "Edu", label: "Education credit claimed", prompt: "The big decision: which education credit fits a freshman in her first degree?", help: "The American Opportunity Tax Credit covers the first four years of college and pays up to 2,500 per student. The Lifetime Learning Credit pays up to 2,000 and fits any year of study, but never more than that.", hint: "First four years of college points to the American Opportunity Tax Credit.",
+              options: [ { t: "American Opportunity Tax Credit: $2,500", ok: true, why: "Correct. 100 percent of the first 2,000 of expenses plus 25 percent of the next 2,000 reaches the full 2,500, and part of it is refundable." }, { t: "Lifetime Learning Credit: $2,000", ok: false, why: "A real credit, but the wrong one here. It pays 500 less and none of it is refundable. Save it for years five and beyond, or graduate school." }, { t: "No credit. Tuition is a personal expense.", ok: false, why: "Tuition is exactly what these credits exist for. Form 1098-T is the proof." } ] },
+            { line: "19", label: "Nonrefundable credits total", prompt: "Total the credits that reduce the tax on Line 24.", help: "Two pieces: the Credit for Other Dependents is 500 for a 19 year old. Of the 2,500 American Opportunity Credit, 1,500 is the nonrefundable part that works here.", hint: "500 plus 1,500.",
+              options: [ { t: "$2,000", ok: true, why: "Correct. The other 1,000 of the education credit comes back as a refundable payment, next step." }, { t: "$2,500", ok: false, why: "That counts the whole education credit here and forgets the 500 for the dependent. The split matters." }, { t: "$500", ok: false, why: "That is only the dependent credit. The education credit is the big piece." } ] },
+            { line: "24", label: "Total tax after credits", prompt: "Line 24: tax after credits.", help: "4,743 minus 2,000.", hint: "Tax minus nonrefundable credits.",
+              options: [ { t: "$2,743", ok: true, why: "Right." }, { t: "$4,743", ok: false, why: "That ignores the credits." }, { t: "$2,532", ok: false, why: "Check the subtraction: 4,743 minus 2,000 is 2,743." } ] },
+            { line: "29", label: "Refundable American Opportunity Credit", prompt: "Line 29: the refundable part of the education credit.", help: "Up to 40 percent of the American Opportunity Tax Credit is refundable. 40 percent of 2,500 is 1,000, and it counts as a payment, like withholding.", hint: "This is the part the Lifetime Learning Credit never gives you.",
+              options: [ { t: "$1,000", ok: true, why: "Correct. Refundable credits pay even past zero tax." }, { t: "$0", ok: false, why: "That throws away the refundable piece, the very reason the American Opportunity Credit wins for freshmen." }, { t: "$2,500", ok: false, why: "Only 40 percent is refundable. The rest already worked as a nonrefundable credit." } ] },
+            { line: "33", label: "Total other payments and refundable credits", prompt: "Total the payments side of the return.", help: "Withholding from both W-2 forms is 4,900 plus 3,100, and the refundable credit of 1,000 counts as a payment too.", hint: "8,000 of withholding plus 1,000 refundable credit.",
+              options: [ { t: "$9,000", ok: true, why: "Correct." }, { t: "$8,000", ok: false, why: "That forgets the refundable credit you just claimed." }, { t: "$10,000", ok: false, why: "Check the pieces: 4,900 plus 3,100 plus 1,000 is 9,000." } ] },
+            { line: "34", label: "Overpayment · refund", prompt: "Payments are 9,000 against a tax of 2,743. What lands on Line 34?", help: "Payments minus tax.", hint: "9,000 minus 2,743.",
+              options: [ { t: "Refund of $6,257", ok: true, why: "Correct. The education credit did heavy lifting on this return." }, { t: "Refund of $4,257", ok: false, why: "That is payments against the tax before credits. The credits already lowered the tax." }, { t: "Refund of $2,743", ok: false, why: "That is the tax itself, not the refund." } ] },
+            { line: "DE", label: "Delaware return · standard deduction", prompt: "Last return of the season: the Millers' Delaware return. Which standard deduction does Delaware give joint filers for 2025?", help: "Delaware's joint standard deduction is double its single one.", hint: "6,500 for joint filers in Delaware.",
+              options: [ { t: "$6,500", ok: true, why: "Correct. Delaware joint filers get 6,500, and each person on the return also earns a 110 dollar personal credit against the tax." }, { t: "$31,500", ok: false, why: "That is the federal joint amount. Delaware's is far smaller." }, { t: "$16,050", ok: false, why: "That is New York's joint amount. The Millers file in Delaware." } ] },
+            { line: "DE Tax", label: "Delaware tax and result", prompt: "Delaware taxable income is 75,000 minus 6,500, which is 68,500. Delaware's brackets, topping out at 6.6 percent, put the tax at 3,505, and three 110 dollar personal credits bring it to 3,175. Their W-2 forms show 3,400 of Delaware tax withheld in Box 17. Finish the state return.", help: "State tax of 3,175 against state withholding of 3,400.", hint: "3,400 minus 3,175.",
+              options: [ { t: "Delaware refund of $225", ok: true, why: "Correct. And note what Delaware never charged this family all year: sales tax. There is none in Delaware, on tuition books, supplies, or anything else." }, { t: "Owes Delaware $225", ok: false, why: "Their state withholding covered the state tax." }, { t: "Delaware refund of $6,257", ok: false, why: "That is the federal refund. The state result is its own, smaller number." } ] }
+          ],
+          result: { amount: 6257, stateAmount: 225, stateLabel: "Delaware", lesson: "Form 1098-T is the tuition form. Form 1098 is the mortgage form. For a student in the first four years of college, the American Opportunity Tax Credit pays up to 2,500 dollars and 40 percent of it can come back as a refund. The Lifetime Learning Credit tops out at 2,000 and never refunds a cent. Picking between them is interview work, and now it is trained. Delaware closed the season with a 225 dollar state refund, from a return with a tiny 6,500 dollar standard deduction and 110 dollar personal credits, in the state with no sales tax at all." }
+        }
+        ,
+        {
+          id: "dana-fl", type: "Rental + Royalties · Schedule E", tier: 4, level: "Level 5 · Hardest return", fee: 320,
+          name: "Dana Whitfield", tag: "Single, rental condo and royalties · Tampa, Florida", initials: "DW", color: "#0f766e",
+          story: "Dana works a steady job in Tampa and looks like the easy Florida case you already know: one W-2, no state income tax. Then the rest of the year shows up: a rental condo and royalties from a management company. Florida stays simple. The federal return does not.",
+          docs: [
+            { title: "Form W-2", sub: "Tax Year 2025", rows: [["Employer", "Tampa Bay Logistics"], ["Box 1 · Wages", "$58,000"], ["Box 2 · Federal tax withheld", "$6,200"], ["Box 16 · State wages (FL)", "$58,000"], ["Box 17 · State tax withheld", "$0"]] }
+          ],
+          decoy: { title: "Form W-2", sub: "Tax Year 2025 · LAST YEAR", rows: [["Employer", "Tampa Bay Logistics"], ["Box 1 · Wages", "$54,300"], ["Box 2 · Federal tax withheld", "$5,710"]] },
+          asks: [
+            { prompt: "The W-2 looks like the easy Florida pattern. What else belongs on this return?",
+              speech: "I also have a condo I rent out. Tenants were in it all year.",
+              options: [
+                { t: "Do you own a rental property, and do you have the rents and expenses for the year?", ok: true, why: "Right. A rental condo is an investment property, and its rents and expenses belong on Schedule E. Easy Florida stops here." },
+                { t: "Is the condo near the beach?", ok: false, why: "Location talk does not build a return. Rents and expenses do." },
+                { t: "Rent from a place you own is not taxable, so we can skip it?", ok: false, why: "Rental income is taxable. It goes on Schedule E, reduced by its expenses." }
+              ],
+              reveal: { fact: "Rental condo rented all year. Rents received $18,000",
+                doc: { title: "Schedule E Worksheet · Rental Condo", sub: "Tax Year 2025", rows: [["Rents received", "$18,000"], ["Mortgage interest", "$7,200"], ["Property taxes", "$2,400"], ["Insurance", "$1,500"], ["Repairs", "$1,800"], ["Depreciation", "$4,500"], ["Total expenses", "$17,400"], ["Net rental income", "$600"]] } } },
+            { prompt: "Rental income is only half the Schedule E story. Ask about the costs the trained way.",
+              speech: "I kept everything: mortgage, taxes, insurance, repairs, and the depreciation sheet.",
+              options: [
+                { t: "Can we list every rental expense, including depreciation, before we total Schedule E?", ok: true, why: "Correct. Depreciation is a real expense on Schedule E, and it lowers taxable rental income even though no cash left her pocket for it this year." },
+                { t: "Should we skip depreciation to keep it simple?", ok: false, why: "Skipping depreciation overstates her income by 4,500. It is part of the rental calculation." },
+                { t: "What did you pay for the condo originally?", ok: false, why: "Purchase price alone is not the expense list. The yearly expenses and depreciation are." }
+              ],
+              reveal: { fact: "Rental expenses total $17,400, including $4,500 depreciation. Net rental is $600" } },
+            { prompt: "One more income source is still hiding. Hunt for it.",
+              speech: "Oh, and a management company sends me a form for royalties every January.",
+              options: [
+                { t: "Is that a Form 1099-MISC with royalties in Box 2, and did the company take a management fee?", ok: true, why: "Exactly. Royalties in Box 2 of Form 1099-MISC go on Schedule E, and the management fee the company charged is a deductible expense against those royalties." },
+                { t: "Royalties are like a bonus from work, so they go on Line 1a?", ok: false, why: "No. Box 2 royalties are not wages. They belong on Schedule E." },
+                { t: "If a company manages it, do we leave it off?", ok: false, why: "Management does not make it disappear. The IRS got a copy of the 1099-MISC." }
+              ],
+              reveal: { fact: "Form 1099-MISC Box 2 royalties $9,500. Management fee 15 percent is $1,425. Net royalties $8,075",
+                doc: { title: "Form 1099-MISC", sub: "Tax Year 2025", rows: [["Payer", "Management company"], ["Box 2 · Royalties", "$9,500"], ["Management fee (15%)", "$1,425"], ["Net royalties", "$8,075"]] } } }
+          ],
+          steps: [
+            { line: "Status", label: "Filing status", prompt: "Set the filing status.", help: "Single all year, lives alone, no dependents.", hint: "Single.",
+              options: [ { t: "Single", ok: true, why: "Correct." }, { t: "Head of Household", ok: false, why: "No qualifying person lives with Dana." }, { t: "Married Filing Jointly", ok: false, why: "Dana was not married this year." } ] },
+            { line: "1a", label: "Total amount from Form W-2, Box 1", prompt: "Line 1a: enter the wages.", help: "Tampa W-2, Box 1. The rental and royalties get their own line.", hint: "Box 1 is wages only. Schedule E income goes on Line 5.",
+              options: [ { t: "$58,000", ok: true, why: "Right. Box 1 goes to Line 1a." }, { t: "$6,200", ok: false, why: "That is Box 2, federal tax already withheld." }, { t: "$0", ok: false, why: "That is Box 17. Florida withheld no state tax, but Dana still earned wages." } ] },
+            { line: "Sch E Rent", label: "Schedule E · net rental income", prompt: "Schedule E, rental part: figure the net rental income.", help: "Rents received were 18,000. Expenses were mortgage interest 7,200, property taxes 2,400, insurance 1,500, repairs 1,800, and depreciation 4,500, for a total of 17,400.", hint: "18,000 minus 17,400. Depreciation counts as an expense.",
+              options: [ { t: "$600", ok: true, why: "Correct. Depreciation lowered the taxable rental income to just 600." }, { t: "$18,000", ok: false, why: "That is the gross rents. Expenses come off on Schedule E." }, { t: "$5,100", ok: false, why: "That leaves out depreciation. 18,000 minus expenses without depreciation is 5,100, but depreciation is a deductible expense." } ] },
+            { line: "Sch E Roy", label: "Schedule E · net royalties", prompt: "Schedule E, royalties part: figure the net royalties.", help: "Form 1099-MISC Box 2 royalties were 9,500 from a management company. The company charged a management fee of 15 percent, which is 1,425.", hint: "9,500 minus 1,425. Management fees are deductible against royalties.",
+              options: [ { t: "$8,075", ok: true, why: "Correct. The management fee is a deductible expense against the royalties." }, { t: "$9,500", ok: false, why: "That is the gross Box 2 amount. The 1,425 management fee comes off." }, { t: "$1,425", ok: false, why: "That is only the fee. The line wants royalties minus the fee." } ] },
+            { line: "5", label: "Rental real estate, royalties, partnerships (Schedule E)", prompt: "Line 5: enter the Schedule E total.", help: "Add the two Schedule E pieces: net rental 600 plus net royalties 8,075.", hint: "600 plus 8,075.",
+              options: [ { t: "$8,675", ok: true, why: "Right. Both the rental condo and the royalties land together on Line 5 through Schedule E." }, { t: "$600", ok: false, why: "That is only the rental. The royalties belong on Schedule E too." }, { t: "$8,075", ok: false, why: "That is only the royalties. Add the net rental." } ] },
+            { line: "9", label: "Total income", prompt: "Line 9: total income.", help: "Wages 58,000 plus Schedule E total 8,675. This is also the AGI on this return.", hint: "58,000 plus 8,675.",
+              options: [ { t: "$66,675", ok: true, why: "Correct. Total income and AGI are both 66,675 here." }, { t: "$58,000", ok: false, why: "That drops the whole Schedule E you just built." }, { t: "$76,500", ok: false, why: "That uses gross rents and gross royalties without expenses. Schedule E taxes the net." } ] },
+            { line: "12", label: "Standard deduction", prompt: "Line 12: the standard deduction.", help: "Tax year 2025 standard deduction for a single filer.", hint: "Single filers get 15,750 in this training year.",
+              options: [ { t: "$15,750", ok: true, why: "Correct for Single in 2025." }, { t: "$23,625", ok: false, why: "That is the Head of Household amount." }, { t: "$31,500", ok: false, why: "That is the joint amount." } ] },
+            { line: "15", label: "Taxable income", prompt: "Line 15: taxable income.", help: "66,675 minus 15,750.", hint: "Total income minus the deduction.",
+              options: [ { t: "$50,925", ok: true, why: "Right." }, { t: "$66,675", ok: false, why: "That skips the deduction." }, { t: "$50,325", ok: false, why: "Check the subtraction: 66,675 minus 15,750 is 50,925." } ] },
+            { line: "16", label: "Tax", prompt: "Line 16: figure the tax.", help: "Game Tax Table for Single: 10 percent on the first 11,925 is 1,192.50. 12 percent on the next 36,550, up to 48,475, is 4,386. 22 percent on the last 2,450 is 539.", hint: "Add the three pieces: 1,192.50 plus 4,386 plus 539.",
+              options: [ { t: "$6,118", ok: true, why: "Correct. Three brackets, one total: 1,192.50 plus 4,386 plus 539 is 6,117.50, and the tax table rounds it to 6,118." }, { t: "$5,093", ok: false, why: "That is a flat 10 percent. Higher income crosses into higher brackets." }, { t: "$5,579", ok: false, why: "That stops after two brackets. The last 2,450 is taxed at 22 percent." } ] },
+            { line: "25a", label: "Federal income tax withheld from W-2", prompt: "Line 25a: enter the withholding.", help: "Federal withholding is Box 2 of the W-2. No tax was withheld from the rental rents or the royalties.", hint: "Box 2 only. Schedule E income had no withholding.",
+              options: [ { t: "$6,200", ok: true, why: "Right. Only the job withheld tax." }, { t: "$0", ok: false, why: "That is Box 17, the Florida state line. Federal withholding is Box 2, and it is 6,200." }, { t: "$6,118", ok: false, why: "That is the tax from Line 16, not a payment." } ] },
+            { line: "34", label: "Overpayment · refund", prompt: "Tax is 6,118 and withholding is 6,200. What lands on Line 34?", help: "Payments beat the tax by a slim margin. The Schedule E income arrived with no withholding, and it used up almost all of her cushion.", hint: "6,200 minus 6,118.",
+              options: [ { t: "Refund of $82", ok: true, why: "Correct. A small refund, much smaller than a wages only return would have given her, because the Schedule E income was taxed with no withholding behind it." }, { t: "Owes $82", ok: false, why: "Direction matters. She paid in slightly more than the tax." }, { t: "Refund of $6,200", ok: false, why: "That refunds every dollar and forgets the 6,118 of tax." } ] },
+            { line: "FL", label: "Florida · Florida has no state income tax", prompt: "Now the Florida question, same as the easy case but with a harder federal return behind it: Dana lived and worked in Florida all year. Florida has no state income tax. What Florida state income tax return does she file for 2025?", help: "Florida has no state income tax, even when the federal return carries Schedule E rental and royalty income. There is no Florida state income tax to report.", hint: "Florida has no state income tax, so there is no state income tax return, and Box 17 stays at zero.",
+              options: [ { t: "No Florida income tax return to file · Florida has no state income tax", ok: true, why: "Correct. Florida has no state income tax. The rental and royalties made the federal return intense. They do not create a Florida state income tax return, because Florida has no state income tax." }, { t: "A Florida Schedule E state return for the rental", ok: false, why: "Schedule E is a federal schedule. Florida has no state income tax, so Florida does not add a state income tax return on top of it." }, { t: "Form IT-201, like New York", ok: false, why: "IT-201 is New York's resident return. Dana never lived or worked in New York, and Florida has no state income tax return like it." } ] },
+            { line: "FL Tax", label: "Florida · no state income tax · result", prompt: "Finish the state lesson. Florida has no state income tax. For Dana's wages, rental, and royalties, what is the Florida result?", help: "Florida has no state income tax: state income tax is $0 because the tax does not exist, state withholding is $0 in Box 17, and there is no state income tax return to file. Do not confuse the federal refund with a state one.", hint: "Florida has no state income tax. Zero tax and zero withholding here mean no tax exists, not a refund and not a bill.",
+              options: [ { t: "Florida has no state income tax · $0 · nothing to file, nothing owed", ok: true, why: "Correct. Florida has no state income tax. The 82 dollar refund on this return is federal only, and the Florida $0 is shown because Florida has no state income tax." }, { t: "Owes Florida $82", ok: false, why: "That 82 is her federal refund, not a Florida bill. Florida has no state income tax, so Florida adds no income tax on top of the federal return." }, { t: "Florida refund of $6,200", ok: false, why: "That is her federal withholding. Florida has no state income tax, so Florida collected no state income tax and Florida refunds no state income tax." } ] }
+          ],
+          result: { amount: 82, stateAmount: 0, stateLabel: "Florida", lesson: "Florida has no state income tax. This is how an easy Florida return turns intense. The W-2 was simple and Florida has no state income tax, so there is no state income tax return, and a correct zero in Box 17. The Florida $0 on the result screen means Florida has no state income tax, not a Florida tax paid down to zero. The work was federal: a rental condo on Schedule E, where depreciation helped cut 18,000 of rents down to 600 of net income, and 1099-MISC Box 2 royalties on the same Schedule E, where the 15 percent management fee came off before the income was taxed. Together Schedule E added 8,675, and because none of it had withholding behind it, her refund shrank to just 82 dollars." }
+        },
+        {
+          id: "harold", type: "Retiree · NYC pension", tier: 4, level: "Level 5 · Hardest return", fee: 300,
+          name: "Harold Greene", tag: "Retired NYC Transit worker, NYCERS pension · New York", initials: "HG", color: "#44546a",
+          story: "Harold ran trains out of the Coney Island yard for thirty years and retired on a pension from NYCERS, the New York City Employees' Retirement System. He lives in Brooklyn on that pension, Social Security, and a little bank interest. He is certain the pension is tax free because it came from the city. In New York he is right. With the IRS he is not, and that split runs this whole return.",
+          docs: [
+            { title: "Form 1099-R", sub: "Tax Year 2025", rows: [["Payer", "NYC Employees' Retirement System (NYCERS)"], ["Box 1 · Gross distribution", "$42,000"], ["Box 2a · Taxable amount", "$42,000"], ["Box 4 · Federal tax withheld", "$3,600"], ["Box 7 · Distribution code", "7 · Normal distribution"], ["Box 14 · State tax withheld", "$0"]] }
+          ],
+          decoy: { title: "Form 1099-R", sub: "Tax Year 2025 · LAST YEAR", rows: [["Payer", "NYC Employees' Retirement System (NYCERS)"], ["Box 1 · Gross distribution", "$40,800"], ["Box 2a · Taxable amount", "$40,800"], ["Box 4 · Federal tax withheld", "$3,450"]] },
+          asks: [
+            { prompt: "Before any numbers: where the pension comes from, and where Harold lives, decide how it is taxed. Ask both.",
+              speech: "Thirty years with Transit, retired five years now. Still in Brooklyn, same apartment.",
+              options: [
+                { t: "Is this a NYCERS pension from your city job, and did you live in New York State all year?", ok: true, why: "Right. The source of the pension and the retiree's state of residence are the two facts that control this whole case: federal tax on one side, a full New York exemption on the other." },
+                { t: "How much is the pension each month?", ok: false, why: "The monthly amount does not decide the tax treatment. The yearly taxable amount is on the 1099-R, and the treatment turns on who paid the pension and where he lives." },
+                { t: "Do you want the pension taxed, or left off the return?", ok: false, why: "Never ask the client to make the tax call. You gather the facts, then the law decides." }
+              ],
+              reveal: { fact: "NYCERS pension from the NYC Transit job. New York State resident all year" } },
+            { prompt: "A pension is rarely a retiree's only income. Ask about the other check.",
+              speech: "Social Security sends me a check every month too. That started back at 62.",
+              options: [
+                { t: "Did Social Security send you a Form SSA-1099 showing the benefits paid?", ok: true, why: "Correct. The SSA-1099 states the benefits, and part of them is taxable on the federal return once other income is high enough." },
+                { t: "Social Security is never taxed, so we can skip it, right?", ok: false, why: "Wrong, and a costly habit. Up to 85 percent of benefits are taxable federally once income passes the thresholds. New York, not the IRS, is the one that leaves Social Security alone." },
+                { t: "What is your Social Security number?", ok: false, why: "You need it for the return header, but it tells you nothing about income. Ask for the benefits form." }
+              ],
+              reveal: { fact: "Social Security benefits of $19,200 on Form SSA-1099",
+                doc: { title: "Form SSA-1099", sub: "Social Security Benefit Statement · 2025", rows: [["Total benefits paid", "$19,200"]] } } },
+            { prompt: "Last sweep: the small envelope retirees almost throw away.",
+              speech: "The bank sent some little form about interest on my savings. Barely worth opening.",
+              options: [
+                { t: "Did the bank send a Form 1099-INT for the interest?", ok: true, why: "Right. Small forms still count. Interest goes on Line 2b of the federal return." },
+                { t: "If it is small, we can leave it off, right?", ok: false, why: "No form the IRS also received is safe to skip. Small amounts still belong on the return." },
+                { t: "How much do you keep in the bank?", ok: false, why: "The balance is not taxed. The interest is, and the form states it." }
+              ],
+              reveal: { fact: "Form 1099-INT shows $300 of bank interest",
+                doc: { title: "Form 1099-INT", sub: "Tax Year 2025", rows: [["Payer", "Brooklyn Savings Bank"], ["Box 1 · Interest income", "$300"]] } } }
+          ],
+          steps: [
+            { line: "Status", label: "Filing status", prompt: "Set the filing status.", help: "Widowed before this tax year, did not remarry, lives alone, no dependents.", hint: "Single.",
+              options: [ { t: "Single", ok: true, why: "Correct." }, { t: "Head of Household", ok: false, why: "Head of Household needs a qualifying person living with him. Harold lives alone." }, { t: "Married Filing Jointly", ok: false, why: "His wife died before this tax year and he did not remarry, so there is no joint return this year." } ] },
+            { line: "5b", label: "Taxable amount of pension (Form 1099-R)", prompt: "Line 5b: enter the taxable pension.", help: "Form 1099-R Box 2a states the taxable amount. NYCERS is a qualified retirement plan under Internal Revenue Code section 401(a), and distributions from a qualified plan are taxable income on the federal return.", hint: "The New York exemption does not apply here. This is the federal return: Box 2a goes on Line 5b.",
+              options: [ { t: "$42,000", ok: true, why: "Correct. A New York City government pension is fully taxable to the IRS. The 1099-R reports it, Box 2a states the taxable amount, and it lands on Line 5b." }, { t: "$0 · city pensions are tax free", ok: false, why: "That is the trap this case teaches. The exemption is a New York rule. Federally, a distribution from a qualified plan under IRC section 401(a) is taxed under section 72, so leaving it off the 1040 understates his income by 42,000, and the IRS has its own copy of the 1099-R." }, { t: "$3,600", ok: false, why: "That is Box 4, the federal tax already withheld from the pension. It is a payment, and it lands later with the other payments, not on the income lines." } ] },
+            { line: "6b", label: "Taxable Social Security benefits", prompt: "Line 6b: the taxable part of the Social Security benefits.", help: "Benefits were 19,200. With 42,000 of pension income, his provisional income is high enough that the maximum share, 85 percent, is taxable federally.", hint: "85 percent of 19,200.",
+              options: [ { t: "$16,320", ok: true, why: "Correct. 85 percent of 19,200. New York will leave this income alone later; the IRS does not." }, { t: "$19,200", ok: false, why: "That taxes every dollar of benefits. Federal law caps the taxable share at 85 percent." }, { t: "$0", ok: false, why: "Social Security is fully tax free only at low incomes. A 42,000 dollar pension pushes him into the 85 percent tier." } ] },
+            { line: "9", label: "Total income", prompt: "Line 9: total income.", help: "Pension 42,000, plus taxable Social Security 16,320, plus bank interest 300.", hint: "42,000 plus 16,320 plus 300.",
+              options: [ { t: "$58,620", ok: true, why: "Right." }, { t: "$42,000", ok: false, why: "That drops the taxable Social Security and the interest you found in the interview." }, { t: "$61,200", ok: false, why: "That uses the full 19,200 of benefits instead of the taxable 16,320." } ] },
+            { line: "12", label: "Standard deduction", prompt: "Line 12: the standard deduction.", help: "Single for 2025 is 15,750, and a filer who is 65 or older gets an additional amount: 2,000 for a single filer. Harold is 68.", hint: "15,750 plus the 2,000 additional amount for age 65 or older.",
+              options: [ { t: "$17,750", ok: true, why: "Correct. The base 15,750 plus 2,000 because he is 65 or older." }, { t: "$15,750", ok: false, why: "That is the base single amount. It misses the additional 2,000 the law gives a single filer who is 65 or older." }, { t: "$23,625", ok: false, why: "That is the Head of Household amount. He files Single." } ] },
+            { line: "15", label: "Taxable income", prompt: "Line 15: taxable income.", help: "58,620 minus 17,750.", hint: "Total income minus the deduction.",
+              options: [ { t: "$40,870", ok: true, why: "Right." }, { t: "$42,870", ok: false, why: "That uses the base 15,750 deduction and forgets the age 65 or older addition." }, { t: "$58,620", ok: false, why: "That skips the deduction entirely." } ] },
+            { line: "16", label: "Tax", prompt: "Line 16: figure the tax.", help: "Game Tax Table for Single: 10 percent of the first 11,925 is 1,192.50. 12 percent of the remaining 28,945 is 3,473.40.", hint: "1,192.50 plus 3,473.40, and the tax table rounds the total.",
+              options: [ { t: "$4,666", ok: true, why: "Correct. 1,192.50 plus 3,473.40 is 4,665.90, and the tax table rounds it to 4,666." }, { t: "$4,087", ok: false, why: "That is a flat 10 percent. Income above the first bracket pays 12 percent." }, { t: "$1,193", ok: false, why: "That is only the first bracket." } ] },
+            { line: "25", label: "Federal income tax withheld from Form 1099-R", prompt: "Payments: enter the withholding.", help: "NYCERS withheld federal tax from the pension all year. It is Box 4 of the 1099-R.", hint: "Box 4 of the 1099-R, not Box 1.",
+              options: [ { t: "$3,600", ok: true, why: "Right. Pension withholding counts as a payment, just like W-2 withholding does." }, { t: "$0", ok: false, why: "Box 14 is zero because New York withheld nothing on an exempt pension. Federal withholding is Box 4, and it is 3,600." }, { t: "$4,666", ok: false, why: "That is the tax from Line 16, not a payment." } ] },
+            { line: "37", label: "Amount you owe", prompt: "Tax is 4,666 and withholding is 3,600. What lands on Line 37?", help: "The pension withholding did not quite cover the tax on a fully taxable pension.", hint: "4,666 minus 3,600, and it is owed.",
+              options: [ { t: "Owes $1,066", ok: true, why: "Correct. This is the federal bill the tax free pension idea hides: the IRS taxes the pension, and his withholding fell short." }, { t: "Refund of $1,066", ok: false, why: "Direction matters. He paid in less than the tax, so money is owed, not returned." }, { t: "Owes $4,666", ok: false, why: "That forgets the 3,600 NYCERS already withheld and sent in." } ] },
+            { line: "NY 10", label: "New York IT-201 · Line 10, pensions and annuities", prompt: "Now the New York return. The IT-201 starts from the federal figures. What goes on Line 10 for the pension?", help: "Line 10 of the IT-201 carries pension and annuity income into the New York calculation: the same 42,000 from the 1099-R.", hint: "Report it first. The exemption comes off on a later line.",
+              options: [ { t: "$42,000", ok: true, why: "Correct. New York starts with the pension on Line 10, then removes it. The exemption works through the subtraction, not by hiding the income." }, { t: "$0 · it is exempt, so leave it off", ok: false, why: "Exempt does not mean invisible. The IT-201 reports the pension on Line 10 and subtracts it on Line 26. Leaving it off both lines makes the state return disagree with the federal one." }, { t: "$16,320", ok: false, why: "That is the taxable Social Security. Line 10 here is the pension." } ] },
+            { line: "NY 26", label: "New York IT-201 · Line 26, pension subtraction", prompt: "Line 26 is where New York takes government pensions back out. How much comes off?", help: "Pensions paid by New York State and its local governments, including NYCERS and the Teachers' Retirement System, are exempt from New York State and New York City income tax when the retiree lives in New York State.", hint: "The full amount. A government pension is not capped the way a private pension exclusion is.",
+              options: [ { t: "$42,000", ok: true, why: "Correct. The entire NYCERS pension comes off on Line 26. It is exempt from New York State tax and from New York City tax alike." }, { t: "$20,000", ok: false, why: "That 20,000 figure is the separate pension and annuity exclusion for private pensions, with its own age test and cap. A New York government pension is fully exempt with no cap. Using 20,000 would tax 22,000 of a pension the state does not tax." }, { t: "$0 · tax it like wages", ok: false, why: "That is the second trap in this case. Wages are taxed by New York; a NYCERS pension paid to a New York resident is not. Taxing it here hands the state money it is not owed." } ] },
+            { line: "NY Tax", label: "New York tax and result", prompt: "Finish the New York return. After the subtractions, his only New York income left is the 300 of bank interest: the pension came off on Line 26, and New York never taxes Social Security benefits. The New York single standard deduction of 8,000 covers the 300. NYCERS withheld no New York tax, Box 14 is zero. What is the result?", help: "New York taxable income is zero, and no New York tax was withheld.", hint: "Zero tax and zero withholding is an even zero, not a refund and not a bill.",
+              options: [ { t: "New York tax $0 · nothing owed, no refund", ok: true, why: "Correct. The pension and the Social Security are both outside New York's reach, the deduction covers the interest, and there is nothing to refund because nothing was withheld." }, { t: "Owes New York tax on the pension", ok: false, why: "No. Line 26 removed the pension in full, so there is no New York tax on it." }, { t: "New York refund of $3,600", ok: false, why: "That 3,600 is federal withholding from Box 4 of the 1099-R. New York withheld nothing, so New York refunds nothing." } ] }
+          ],
+          result: { amount: -1066, stateAmount: 0, stateLabel: "New York (State + City)", lesson: "One pension, two tax laws. Under the Internal Revenue Code, NYCERS is a qualified plan under section 401(a), its distributions are reported on Form 1099-R, and the full 42,000 was taxable on the federal return, where Harold owed 1,066 because his withholding fell short. Under New York law, that same pension is exempt from state and city tax for a New York resident: it went onto the IT-201 at Line 10 and came straight back off at Line 26, all 42,000 of it. The two traps are mirror images: leaving the pension off the federal return, and taxing it on the New York one. A trained preparer does neither." }
+        }
+
+      ];
+
+      /* ================= Order: ramp tiers, shuffle inside tiers ================= */
+      function shuffle(arr) {
+        var a = arr.slice();
+        for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+        return a;
+      }
+      function buildOrder() {
+        var tiers = {};
+        CLIENTS.forEach(function (c) { (tiers[c.tier] = tiers[c.tier] || []).push(c); });
+        var keys = Object.keys(tiers).sort(function (a, b) { return a - b; });
+        var order = [];
+        var lastType = null;
+        keys.forEach(function (k) {
+          var group = shuffle(tiers[k]);
+          if (group.length > 1 && lastType && group[0].type === lastType) { group.push(group.shift()); }
+          group.forEach(function (c) { order.push(c); lastType = c.type; });
+        });
+        return order;
+      }
+
+      /* ================= State ================= */
+      var S = null;
+      var UNLOCKED = false;
+      var FREE_COUNT = 3;
+      function newState() {
+        trackHit("plays");
+        return {
+          unlocked: UNLOCKED,
+          order: buildOrder(), ci: 0, phase: "intro", askIdx: 0, stepIdx: 0,
+          score: 0, fees: 0, attempts: 0, firstTry: 0, questions: 0,
+          streak: 0, bestStreak: 0, mistakesThisClient: 0, clientQuestions: 0, clientFirstTry: 0,
+          mode: "normal", pendingMode: "normal", filled: {}, docs: [], facts: [],
+          timerId: null, timerLeft: 0, locked: false, breakCount: 0
+        };
+      }
+      function client() { return S.order[S.ci]; }
+
+      /* ================= Rendering helpers ================= */
+      var app = document.getElementById("app");
+      var hud = document.getElementById("hud");
+      function el(html) { var d = document.createElement("div"); d.innerHTML = html; return d.firstElementChild; }
+      function updateHud() {
+        document.getElementById("hud-client").textContent = Math.min(S.ci + 1, S.order.length) + " of " + S.order.length;
+        document.getElementById("hud-score").textContent = S.score.toLocaleString("en-US");
+        document.getElementById("hud-fees").textContent = money(S.fees);
+        document.getElementById("hud-streak").textContent = S.streak;
+        var dots = "";
+        for (var i = 0; i < S.order.length; i++) {
+          dots += "<i class=\"" + (i < S.ci ? "done" : (i === S.ci ? "now" : "")) + "\"></i>";
+        }
+        document.getElementById("hud-dots").innerHTML = dots;
+      }
+      function stopTimer() { if (S.timerId) { clearInterval(S.timerId); S.timerId = null; } }
+      function docHtml(d, isDecoy) {
+        var rows = d.rows.map(function (r) { return "<div class=\"doc-row\"><span>" + esc(r[0]) + "</span><span class=\"v\">" + esc(r[1]) + "</span></div>"; }).join("");
+        return "<div class=\"doc" + (isDecoy ? " decoy" : "") + "\"><div class=\"doc-head\"><b>" + esc(d.title) + "</b><span>" + esc(d.sub) + "</span></div>" + rows + "</div>";
+      }
+      function asideHtml() {
+        var c = client();
+        var facts = S.facts.length
+          ? "<ul class=\"fact-list\">" + S.facts.map(function (f) { return "<li>" + esc(f) + "</li>"; }).join("") + "</ul>"
+          : "<p class=\"fact-empty\">Nothing found yet. The interview fills this in.</p>";
+        var docs = S.docs.map(function (d) { return docHtml(d, false); }).join("");
+        if (S.mode === "challenge" && c.decoy) docs += docHtml(c.decoy, true);
+        var formRows = c.steps.map(function (st) {
+          var filled = S.filled.hasOwnProperty(st.line);
+          var active = S.phase === "form" && c.steps[S.stepIdx] === st;
+          return "<div class=\"f-row" + (filled ? " filled" : "") + (active ? " active" : "") + "\"><span class=\"ln\">" + esc(st.line) + "</span><span class=\"lb\">" + esc(st.label) + "</span><span class=\"fv\">" + (filled ? esc(S.filled[st.line]) : "<span class=\"blank\">........</span>") + "</span></div>";
+        }).join("");
+        return "<aside class=\"col\">" +
+          "<div class=\"card\"><div class=\"client-head\"><div class=\"avatar\" style=\"background:" + c.color + "\">" + esc(c.initials) + "</div><div><h2>" + esc(c.name) + "<span class=\"diff-badge\">" + esc(c.type) + "</span></h2><div class=\"client-tag\">" + esc(c.tag) + " · " + esc(c.level) + "</div></div></div>" +
+          "<p class=\"client-story\">" + esc(c.story) + "</p>" + facts + "</div>" +
+          "<div><h3 class=\"sec\">Documents on the desk</h3>" + (S.mode === "challenge" && c.decoy ? "<p class=\"doc-note\">Challenge round: last year's papers are mixed into the pile. Check the tax year on every document.</p>" : "") + docs + "</div>" +
+          "<div><h3 class=\"sec\">The return · federal 1040 plus state</h3><div class=\"form1040\"><div class=\"f-head\"><b>Form 1040</b><span>U.S. Individual Income Tax Return · Training copy</span></div>" + formRows + "</div></div>" +
+          "</aside>";
+      }
+      function bannerAdHtml() {
+        var p = PRODUCTS[(S.ci + S.askIdx + S.stepIdx + S.breakCount) % PRODUCTS.length];
+        return "<div class=\"ad-banner\"><div class=\"ad-txt\"><span class=\"ad-kicker\">More from Genextra LLC</span><b>" + esc(p.name) + "</b> · " + esc(p.price) + "</div><a class=\"btn amber\" href=\"" + p.url + "\" target=\"_blank\" rel=\"noopener\">" + esc(p.cta) + "</a></div>";
+      }
+      function modeBannerHtml() {
+        if (S.phase !== "ask" && S.phase !== "form") return "";
+        if (S.mode === "challenge") return "<div class=\"mode-banner challenge\"><b>Challenge round.</b> Your streak earned a harder test: a deadline on every question, bonus points for first try answers, and last year's documents mixed into the pile.</div>";
+        if (S.mode === "coach") return "<div class=\"mode-banner coach\"><b>Coach mode.</b> The last case was rough, so this one comes with a coach hint on every question. Slow down, use the documents, and rebuild the streak.</div>";
+        return "";
+      }
+      /* ================= Sharing =================
+         Always share the short public link, never the page's own address. */
+      var SHARE_URL = "https://davynation.com/1040game";
+      function copyShareLink(statusId) {
+        var status = document.getElementById(statusId);
+        function done() { if (status) status.textContent = "Link copied: " + SHARE_URL; }
+        function legacy() {
+          var ta = document.createElement("textarea");
+          ta.value = SHARE_URL;
+          ta.setAttribute("readonly", "");
+          ta.style.position = "fixed"; ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand("copy"); done(); }
+          catch (e) { if (status) status.textContent = "Copy this link: " + SHARE_URL; }
+          document.body.removeChild(ta);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(SHARE_URL).then(done, legacy);
+        } else { legacy(); }
+      }
+      function shareGame(statusId) {
+        var status = document.getElementById(statusId);
+        if (navigator.share) {
+          try {
+            navigator.share({ title: "The 1040 Game", text: "The 1040 Game", url: SHARE_URL })
+              .catch(function (err) {
+                if (err && err.name === "AbortError") return;
+                copyShareLink(statusId);
+              });
+          } catch (e) { copyShareLink(statusId); }
+        } else {
+          copyShareLink(statusId);
+        }
+      }
+
+      /* ================= Screens ================= */
+      function startScreen() {
+        hud.classList.add("hidden");
+        app.innerHTML =
+          "<div class=\"start step-anim\">" +
+          "<span class=\"start-badge\">The 1040 Game · by Genextra LLC</span>" +
+          "<h1>Train like a <span class=\"hl\">tax preparer.</span></h1>" +
+          "<p class=\"lede\">This is training first and a game second. You will interview real style clients, hunt for the documents that matter, and build real Form 1040 returns line by line, then handle each client's state side: a New York, New Jersey, or Delaware return, or the Florida case: Florida has no state income tax, so there is no state income tax return at all. The clients, scores, levels, and streaks are the game. The skill is real.</p>" +
+          "<div class=\"disclaimer\" role=\"note\"><b>Disclaimer:</b> This simulation is based on tax year 2025 tax law. Tax laws change from year to year, so figures may differ in other years.</div>" +
+          "<div class=\"how\">" +
+          "<div class=\"how-step\"><div class=\"num\">1</div><h3>Interview the client</h3><p>Filing status, dependents, side income, a home, a kid in college. The right questions decide the return before any number is typed.</p></div>" +
+          "<div class=\"how-step\"><div class=\"num\">2</div><h3>Build the 1040</h3><p>Turn W-2, 1099, Form 1098, and Form 1098-T papers into Lines 1a through 34, then the state lines: IT-201 for New York, NJ-1040 for New Jersey, the Delaware return, or the Florida no return call, each with its own rules.</p></div>" +
+          "<div class=\"how-step\"><div class=\"num\">3</div><h3>Level up your training</h3><p>Cases start simple and get harder, and every case now carries a state lesson with up to date 2025 rules. Hot streaks unlock challenge rounds with deadlines and trickier documents. Rough cases trigger coach mode with extra hints.</p></div>" +
+          "</div>" +
+          "<h2 style=\"font-size:1.3rem;margin:2px 0 12px;\">Now with four states: New York, New Jersey, Delaware, and Florida</h2>" +"<div class=\"states\">" +"<div class=\"state-card\"><h3>New York · IT-201</h3><p>Its own standard deduction for 2025: 8,000 single, 11,300 head of household, 16,050 joint. Rates start at 4 percent, and New York City residents pay a city tax on top.</p></div>" +"<div class=\"state-card\"><h3>New Jersey · NJ-1040</h3><p>No standard deduction. Exemptions of 1,000 per filer and 1,500 per dependent, and homeowners can deduct property tax up to 15,000. Rates start at 1.4 percent.</p></div>" +"<div class=\"state-card\"><h3>Delaware · no sales tax</h3><p>No sales tax anywhere in the state, but income is taxed: standard deduction 3,250 single and 6,500 joint, a 110 dollar personal credit, and rates from 2.2 to 6.6 percent.</p></div>" +"<div class=\"state-card\"><h3>Florida · Florida has no state income tax</h3><p>Florida has no state income tax. There is no state income tax return for a wage earner and no state income tax withholding, so Box 17 on a Florida W-2 is 0. Florida has no state income tax, but the state still collects tax other ways, including a 6 percent statewide sales tax, and counties can add more.</p></div>" +"</div>" +"<button class=\"btn big\" id=\"start-btn\">Start Training</button>" +
+          "<div class=\"share-row\"><button class=\"btn ghost\" id=\"share-btn\" type=\"button\">Share The 1040 Game</button><span class=\"share-status\" id=\"share-status-start\" role=\"status\" aria-live=\"polite\"></span></div>" +
+          "<p class=\"fineprint\">The first three training cases are free, a full taste of the interview and the 1040. The full training, seven more cases plus challenge rounds, unlocks two ways: The 1040 Game on its own for $69.99, or the Tax Preparer Playbook for $199 which includes the game and the full course. Either license key unlocks the rest. <button class=\"textbtn\" id=\"have-key\" style=\"background:none;border:none;color:var(--accent-dark);font-weight:800;text-decoration:underline;cursor:pointer;padding:6px 2px;\">Already bought it? Enter your license key.</button></p>" +
+          "<p class=\"fineprint\">Disclaimer: This simulation is based on tax year 2025 tax law. Tax laws change from year to year, so figures may differ in other years. Training figures are simplified for learning. Real returns follow current IRS and state rules.</p>" +
+          "<div class=\"creator\">Created by <b>Genextra LLC</b> · Tax preparer training through play</div>" +
+          "</div>";
+        document.getElementById("start-btn").addEventListener("click", function () {
+          S = newState();
+          hud.classList.remove("hidden");
+          startClient();
+        });
+        document.getElementById("share-btn").addEventListener("click", function () { shareGame("share-status-start"); });
+        document.getElementById("have-key").addEventListener("click", function () { gateScreen(true); });
+      }
+
+      function gateScreen(fromStart) {
+        stopTimer();
+        hud.classList.add("hidden");
+        var pb = productById("playbook");
+        var gm = productById("game");
+        app.innerHTML =
+          "<div style=\"max-width:820px;margin:10px auto 0;\"><div class=\"spotlight step-anim\">" +
+          "<span class=\"ad-kicker\">Free training complete · Full training locked</span>" +
+          "<h2>You finished the free training. The advanced cases are next.</h2>" +
+          "<p>You have filed three full training returns, each with its federal 1040 and its state lesson attached: a state return for New York, New Jersey, or Delaware, or the Florida call that no state income tax return exists. That is the real workflow, and it was free. The full training unlocks everything after it:</p>" +
+          "<ul class=\"gate-list\">" +
+          "<li><b>Side income case:</b> a 1099-NEC, Schedule C profit, and a client who owes</li>" +
+          "<li><b>Homeowner case:</b> Form 1098 mortgage interest and the Schedule A versus standard deduction decision</li>" +
+          "<li><b>Family credit ages case:</b> a 2,200 dollar credit and a 500 dollar credit in the same house</li>" +
+          "<li><b>College case:</b> Form 1098-T tuition and the American Opportunity versus Lifetime Learning credit choice</li>" +
+          "<li><b>Florida intense case:</b> an easy Florida W-2 that turns hard, with a rental condo on Schedule E and 1099-MISC royalties from a management company</li>" +
+          "<li><b>Retiree pension case:</b> a retired New York City worker with a NYCERS Form 1099-R pension, taxable to the IRS under the Internal Revenue Code and fully exempt on the New York return</li>" +
+          "<li><b>State lessons throughout:</b> New York IT-201, New Jersey NJ-1040, and Delaware returns with their own up to date 2025 deductions, exemptions, and rates, plus the Florida case with no state income tax and no state return to file</li><li><b>Challenge rounds</b> with client deadlines and last year's documents mixed into the pile, <b>coach mode</b>, and your final preparer grade</li>" +
+          "</ul>" +
+          "<p>Enjoying the game? You can do this for real. Pick how you want to unlock the rest. Gumroad sends every buyer a unique license key with the purchase, and either key opens the full training.</p>" +
+          "<div class=\"gate-options\">" +
+          "<div class=\"gate-opt\"><span class=\"g-tag\">Game only</span><h3>The 1040 Game</h3><span class=\"g-price\">$69.99</span><p>Just the game: all nine training cases, challenge rounds, coach mode, and your final preparer grade. No course, no book, just the full training game.</p><a class=\"btn amber\" href=\"" + gm.url + "\" target=\"_blank\" rel=\"noopener\">Get The 1040 Game · $69.99</a></div>" +
+          "<div class=\"gate-opt featured\"><span class=\"g-tag\">Best value · Includes the game</span><h3>Tax Preparer Playbook</h3><span class=\"g-price\">$199</span><p>The full course: the step by step playbook for doing this work for real, clients, interviews, forms, fees, and a full tax season, start to finish. Includes The 1040 Game.</p><a class=\"btn amber\" href=\"" + pb.url + "\" target=\"_blank\" rel=\"noopener\">Get the Playbook · $199 · includes the game</a></div>" +
+          "</div>" +
+          "<h3 style=\"color:#fff;margin:26px 0 8px;font-size:1.1rem;\">Have your license key?</h3>" +
+          "<p style=\"margin-bottom:10px;\">Enter the key from your Gumroad receipt to unlock the full training. The gate accepts either a Playbook license key or a The 1040 Game license key. One key per buyer: your key is licensed to you only, so do not share it. Shared keys can be turned off.</p>" +
+          "<input class=\"key-input\" id=\"key-input\" type=\"text\" autocomplete=\"off\" spellcheck=\"false\" placeholder=\"Example: 1A2B3C4D-5E6F7A8B-9C0D1E2F-3A4B5C6D\" aria-label=\"License key\" />" +
+          "<div id=\"key-msg\"></div>" +
+          "<div class=\"row\" style=\"margin-top:14px;\"><button class=\"btn amber\" id=\"unlock-btn\">Unlock full training</button>" +
+          "<button class=\"textbtn\" id=\"gate-back\">" + (fromStart ? "Back to the start" : "Not now: replay the free cases") + "</button></div>" +
+          "</div></div>";
+        var input = document.getElementById("key-input");
+        function tryUnlock() {
+          var key = input.value.trim().toUpperCase();
+          var msg = document.getElementById("key-msg");
+          if (/^[0-9A-F]{8}-[0-9A-F]{8}-[0-9A-F]{8}-[0-9A-F]{8}$/.test(key)) {
+            UNLOCKED = true;
+            if (S) S.unlocked = true;
+            msg.innerHTML = "<div class=\"gate-ok\">Key accepted. The full training is unlocked. Welcome to the advanced cases.</div>";
+            setTimeout(function () {
+              if (fromStart || !S) { S = newState(); hud.classList.remove("hidden"); startClient(); }
+              else { S.ci++; hud.classList.remove("hidden"); startClient(); }
+            }, 900);
+          } else {
+            msg.innerHTML = "<div class=\"gate-err\">That does not match the license key format on a Gumroad receipt. Check for typos and try again, or use one of the buy buttons above to get your key.</div>";
+          }
+        }
+        document.getElementById("unlock-btn").addEventListener("click", tryUnlock);
+        input.addEventListener("keydown", function (e) { if (e.key === "Enter") tryUnlock(); });
+        document.getElementById("gate-back").addEventListener("click", function () {
+          if (fromStart) { startScreen(); }
+          else { S = newState(); hud.classList.remove("hidden"); startClient(); }
+        });
+        window.scrollTo(0, 0);
+      }
+
+      function startClient() {
+        var c = client();
+        S.phase = "intro"; S.askIdx = 0; S.stepIdx = 0;
+        S.filled = {}; S.facts = []; S.docs = c.docs.slice();
+        S.mistakesThisClient = 0; S.clientQuestions = 0; S.clientFirstTry = 0;
+        S.mode = S.pendingMode;
+        render();
+      }
+
+      function playShell(inner) {
+        app.innerHTML = "<div class=\"board\">" + asideHtml() + "<section class=\"play\"><div class=\"card step-anim\">" + inner + "</div>" + bannerAdHtml() + "</section></div>";
+        updateHud();
+      }
+
+      function render() {
+        stopTimer();
+        S.locked = false;
+        var c = client();
+        if (S.phase === "intro") {
+          playShell(
+            "<span class=\"phase-tag interview\">Training case " + (S.ci + 1) + " of " + S.order.length + "</span>" +
+            "<h2>" + esc(c.name) + "</h2>" +
+            "<div class=\"speech\"><b>" + esc(c.name.split(" ")[0]) + " sits down.</b> " + esc(c.story) + "</div>" +
+            "<p class=\"prompt\">Your training task: run the interview, then build the return. Case fee on completion: <span class=\"mono\">" + money(c.fee) + "</span>.</p>" +
+            "<p class=\"help\">" + esc(c.level) + " · Case type: " + esc(c.type) + "</p>" +
+            modeBannerHtml().replace("phase", "phase") +
+            "<button class=\"btn\" id=\"go\">Begin the interview</button>"
+          );
+          document.getElementById("go").addEventListener("click", function () { S.phase = "ask"; render(); });
+        } else if (S.phase === "ask") {
+          renderQuestion(c.asks[S.askIdx], true);
+        } else if (S.phase === "form") {
+          renderQuestion(c.steps[S.stepIdx], false);
+        } else if (S.phase === "result") {
+          renderResult();
+        }
+        window.scrollTo(0, 0);
+      }
+
+      function renderQuestion(q, isAsk) {
+        var c = client();
+        var tag = isAsk
+          ? "<span class=\"phase-tag interview\">Interview · Question " + (S.askIdx + 1) + " of " + c.asks.length + "</span>"
+          : "<span class=\"phase-tag form\">Form 1040 · Line " + esc(q.line) + "</span>";
+        var speech = isAsk && q.speech ? "<div class=\"speech\"><b>" + esc(c.name.split(" ")[0]) + ":</b> “" + esc(q.speech) + "”</div>" : "";
+        var timer = "";
+        if (S.mode === "challenge") {
+          timer = "<div class=\"timer-wrap\"><div class=\"timer-label\"><span>Client deadline</span><b id=\"timer-num\"></b></div><div class=\"timer-bar\"><div class=\"timer-fill\" id=\"timer-fill\" style=\"width:100%\"></div></div></div>";
+        }
+        var hint = (S.mode === "coach" && q.hint) ? "<div class=\"hint-box\"><b>Coach hint:</b> " + esc(q.hint) + "</div>" : "";
+        var opts = q.options.map(function (o, i) {
+          return "<button class=\"opt\" data-i=\"" + i + "\"><span>" + esc(o.t) + "</span></button>";
+        }).join("");
+        playShell(
+          modeBannerHtml() + tag + timer +
+          "<h2>" + (isAsk ? "The interview" : "Line " + esc(q.line) + " · " + esc(q.label)) + "</h2>" +
+          speech +
+          "<p class=\"prompt\">" + esc(q.prompt) + "</p>" +
+          (q.help ? "<p class=\"help\">" + esc(q.help) + "</p>" : "") +
+          hint +
+          "<div class=\"opts\" id=\"opts\">" + opts + "</div><div id=\"fb\"></div>"
+        );
+        var btns = app.querySelectorAll("#opts .opt");
+        btns.forEach(function (b) {
+          b.addEventListener("click", function () { answer(q, parseInt(b.getAttribute("data-i"), 10), b, isAsk); });
+        });
+        if (S.mode === "challenge") startTimer(q, isAsk);
+      }
+
+      function startTimer(q, isAsk) {
+        var c = client();
+        var secs = Math.max(22, 52 - c.tier * 5 - Math.floor(S.bestStreak / 2));
+        S.timerLeft = secs;
+        var fill = document.getElementById("timer-fill");
+        var num = document.getElementById("timer-num");
+        if (num) num.textContent = secs + "s";
+        var total = secs;
+        stopTimer();
+        S.timerId = setInterval(function () {
+          S.timerLeft -= 0.25;
+          if (fill) { fill.style.width = Math.max(0, (S.timerLeft / total) * 100) + "%"; if (S.timerLeft <= 8) fill.classList.add("low"); }
+          if (num) num.textContent = Math.ceil(Math.max(0, S.timerLeft)) + "s";
+          if (S.timerLeft <= 0) {
+            stopTimer();
+            if (!S.locked) timeOut(q, isAsk);
+          }
+        }, 250);
+      }
+
+      function timeOut(q, isAsk) {
+        S.locked = true;
+        S.attempts++; S.streak = 0; S.mistakesThisClient++;
+        var correct = null;
+        q.options.forEach(function (o) { if (o.ok) correct = o; });
+        var fb = document.getElementById("fb");
+        if (fb) {
+          fb.innerHTML = "<div class=\"feedback bad\"><b>Deadline missed.</b> The client had to leave, and the moment passed. The trained answer was: “" + esc(correct.t) + "” " + esc(correct.why) + " <br><button class=\"btn\" id=\"cont\">Take it again, no clock</button></div>";
+          var cont = document.getElementById("cont");
+          if (cont) cont.addEventListener("click", function () { S.mode = "normal"; render(); });
+        }
+        var btns = app.querySelectorAll("#opts .opt");
+        btns.forEach(function (b) { b.disabled = true; });
+        updateHud();
+      }
+
+      function answer(q, idx, btn, isAsk) {
+        if (S.locked) return;
+        var opt = q.options[idx];
+        S.questions++; S.clientQuestions++;
+        if (S.attemptOnThis === undefined || S.attemptOnThis === null) S.attemptOnThis = 0;
+        if (opt.ok) {
+          S.locked = true;
+          stopTimer();
+          var firstTry = S.attemptOnThis === 0;
+          var pts = firstTry ? 100 : (S.attemptOnThis === 1 ? 60 : 30);
+          if (S.mode === "challenge" && firstTry) pts = 150;
+          if (firstTry) { S.firstTry++; S.clientFirstTry++; S.streak++; if (S.streak > S.bestStreak) S.bestStreak = S.streak; }
+          S.score += pts;
+          btn.classList.add("good");
+          var btns = app.querySelectorAll("#opts .opt");
+          btns.forEach(function (b) { b.disabled = true; });
+          if (!isAsk) {
+            S.filled[q.line] = opt.t;
+            var aside = app.querySelector("aside.col");
+            if (aside) { var fresh = el(asideHtml()); aside.replaceWith(fresh); }
+          }
+          if (isAsk && q.reveal) {
+            if (q.reveal.fact) S.facts.push(q.reveal.fact);
+            if (q.reveal.doc) S.docs.push(q.reveal.doc);
+            var aside2 = app.querySelector("aside.col");
+            if (aside2) { var fresh2 = el(asideHtml()); aside2.replaceWith(fresh2); }
+          }
+          var fb = document.getElementById("fb");
+          fb.innerHTML = "<div class=\"feedback good\"><b>Correct. <span class=\"points-pop\">+" + pts + " points</span></b>" + esc(opt.why) + "<br><button class=\"btn\" id=\"cont\">Continue</button></div>";
+          document.getElementById("cont").addEventListener("click", function () { advance(isAsk); });
+          updateHud();
+        } else {
+          S.attemptOnThis++;
+          S.streak = 0; S.mistakesThisClient++;
+          btn.classList.add("bad");
+          btn.disabled = true;
+          var correctOpt = null;
+          q.options.forEach(function (o) { if (o.ok) correctOpt = o; });
+          var fb2 = document.getElementById("fb");
+          fb2.innerHTML = "<div class=\"feedback bad\"><b>Not quite. Here is where that went wrong.</b> " + esc(opt.why) +
+            (correctOpt
+              ? "<br><br><b>The trained answer is: “" + esc(correctOpt.t) + "”</b> " + esc(correctOpt.why) + " Pick it now, and keep the lesson, not just the lost points."
+              : " Try another answer.") + "</div>";
+          updateHud();
+        }
+      }
+
+      function advance(isAsk) {
+        S.attemptOnThis = 0;
+        var c = client();
+        if (isAsk) {
+          if (S.askIdx < c.asks.length - 1) { S.askIdx++; }
+          else { S.phase = "form"; S.stepIdx = 0; }
+        } else {
+          if (S.stepIdx < c.steps.length - 1) { S.stepIdx++; }
+          else { S.phase = "result"; }
+        }
+        render();
+      }
+
+      function renderResult() {
+        stopTimer();
+        var c = client();
+        var r = c.result;
+        S.fees += c.fee;
+        var owes = r.amount < 0;
+        var stateAmt = (typeof r.stateAmount === "number") ? r.stateAmount : 0;
+        var stateOwes = stateAmt < 0;
+        var stateZero = stateAmt === 0;
+        var stateLabel = r.stateLabel || "State";
+        var isFlorida = stateLabel === "Florida";
+        var fedCap = owes ? "Owes" : (r.amount === 0 ? "Nothing owed · no refund" : "Refund");
+        var stateCap = stateOwes ? "Owes" : (stateZero ? (isFlorida ? "Florida has no state income tax" : "Nothing owed · no refund") : "Refund");
+        var stateSub = isFlorida ? "Florida has no state income tax · No state income tax return to file · $0 tax · $0 withheld · Nothing owed, no refund" : (stateZero ? "Tax $0 · nothing withheld to refund" : "");
+        var clean = S.mistakesThisClient === 0;
+        if (clean) S.pendingMode = "challenge";
+        else if (S.mistakesThisClient >= 3) S.pendingMode = "coach";
+        else S.pendingMode = "normal";
+        var nextNote = S.ci >= S.order.length - 1 ? "" :
+          (S.pendingMode === "challenge" ? "<p class=\"help\">Clean case. Your next client arrives as a challenge round: deadlines on, trickier documents, bonus points.</p>" :
+           S.pendingMode === "coach" ? "<p class=\"help\">That case had some bumps. Your next client comes with coach mode: extra hints on every question while you rebuild.</p>" :
+           "<p class=\"help\">Next client coming up, a step further into the season.</p>");
+        app.innerHTML = "<div class=\"board\">" + asideHtml() + "<section class=\"play\"><div class=\"card step-anim\">" +
+          "<span class=\"phase-tag result\">Return filed</span>" +
+          "<h2 style=\"margin-top:4px;\">" + esc(c.name) + " · Federal and state results</h2>" +
+          "<p class=\"help\">Both results, shown separately. The federal result never includes the state result, and the state result never includes the federal one.</p>" +
+          "<div class=\"refund-dual\">" +
+          "<div class=\"refund-box" + (owes ? " owes" : (r.amount === 0 ? " zero" : "")) + "\"><span class=\"jurisdiction\">Federal · Form 1040</span><div class=\"big\">" + money(r.amount) + "</div><div class=\"cap\">" + fedCap + "</div></div>" +
+          "<div class=\"refund-box" + (stateOwes ? " owes" : (stateZero ? " zero" : "")) + "\"><span class=\"jurisdiction\">" + esc(stateLabel) + "</span><div class=\"big\">" + money(stateAmt) + "</div><div class=\"cap\">" + stateCap + "</div>" + (stateSub ? "<div class=\"sub\">" + esc(stateSub) + "</div>" : "") + "</div>" +
+          "</div>" +
+          "<div class=\"refund-stamp-wrap\"><div class=\"stamp\">Accepted</div></div>" +
+          "<div class=\"result-stats\"><span class=\"chip\">Case fee <b>" + money(c.fee) + "</b></span><span class=\"chip\">First try answers <b>" + S.clientFirstTry + " of " + S.clientQuestions + "</b></span><span class=\"chip gold\">Score <b>" + S.score.toLocaleString("en-US") + "</b></span></div>" +
+          "<div class=\"lesson\"><b>Training note:</b> " + esc(r.lesson) + "</div>" +
+          nextNote +
+          "<button class=\"btn\" id=\"next\">" + (S.ci >= S.order.length - 1 ? "Finish training session" : (!S.unlocked && S.ci === FREE_COUNT - 1 ? "Continue: unlock the full training" : "Next client")) + "</button>" +
+          "<div class=\"share-row\"><button class=\"btn ghost\" id=\"share-btn-result\" type=\"button\">Share The 1040 Game</button><span class=\"share-status\" id=\"share-status-result\" role=\"status\" aria-live=\"polite\"></span></div>" +
+          "</div>" + bannerAdHtml() + "</section></div>";
+        updateHud();
+        document.getElementById("share-btn-result").addEventListener("click", function () { shareGame("share-status-result"); });
+        document.getElementById("next").addEventListener("click", function () {
+          if (S.ci >= S.order.length - 1) { finalScreen(); }
+          else if (!S.unlocked && S.ci === FREE_COUNT - 1) { gateScreen(false); }
+          else { breakScreen(); }
+        });
+        window.scrollTo(0, 0);
+      }
+
+      function breakScreen() {
+        stopTimer();
+        var p = productById(BREAK_ORDER[S.breakCount % BREAK_ORDER.length]);
+        S.breakCount++;
+        var isPlaybook = p.id === "playbook";
+        app.innerHTML = "<div style=\"max-width:760px;margin:10px auto 0;\"><div class=\"spotlight step-anim\">" +
+          "<span class=\"ad-kicker\">Training break · From Genextra LLC</span>" +
+          (isPlaybook
+            ? "<h2>Enjoying the game? You can do this for real.</h2><p>Everything you just practiced, the interview, the forms, the credits, is a real service people pay for every tax season. The Tax Preparer Playbook teaches the business end to end.</p><span class=\"price\">" + esc(p.price) + "</span>"
+            : "<h2>" + esc(p.name) + "</h2><p>" + esc(p.desc) + "</p><span class=\"price\">" + esc(p.price) + "</span>") +
+          "<div class=\"row\"><a class=\"btn amber\" href=\"" + p.url + "\" target=\"_blank\" rel=\"noopener\">" + (isPlaybook ? "Tax Preparer Playbook" : esc(p.cta)) + "</a>" +
+          "<button class=\"btn ghost\" id=\"back\">Back to training</button></div>" +
+          "</div></div>";
+        document.getElementById("back").addEventListener("click", function () { S.ci++; startClient(); });
+        window.scrollTo(0, 0);
+      }
+
+      function finalScreen() {
+        stopTimer();
+        hud.classList.add("hidden");
+        var totalQ = S.questions || 1;
+        var acc = Math.round((S.firstTry / totalQ) * 100);
+        var grade, stars, note;
+        if (acc >= 85) { grade = "Master Preparer"; stars = "★★★★★"; note = "Clean interviews, right credits, right lines. You are ready to train on real returns."; }
+        else if (acc >= 65) { grade = "Pro Preparer"; stars = "★★★★☆"; note = "Strong work. A few answers needed a second look, and that is exactly what training is for."; }
+        else if (acc >= 45) { grade = "Junior Preparer"; stars = "★★★☆☆"; note = "You finished every return. The reps are working. Another session will tighten the interview habits."; }
+        else { grade = "Trainee"; stars = "★★☆☆☆"; note = "Every expert started here. The cases taught the questions; run the session again and watch the score climb."; }
+        var grid = PRODUCTS.map(function (p) {
+          return "<div class=\"product\"><div class=\"cover " + p.cover + "\"><span class=\"ct\">" + esc(p.coverTitle) + "</span><span class=\"cs\">" + esc(p.coverSub) + "</span></div><div><h3>" + esc(p.name) + "</h3><p>" + esc(p.desc) + "</p><span class=\"price\">" + esc(p.price) + "</span><a href=\"" + p.url + "\" target=\"_blank\" rel=\"noopener\">" + esc(p.cta) + "</a></div></div>";
+        }).join("");
+        var pb = productById("playbook");
+        app.innerHTML =
+          "<div class=\"start step-anim\">" +
+          "<span class=\"start-badge\">Training session complete</span>" +
+          "<div class=\"stars\" aria-hidden=\"true\">" + stars + "</div>" +
+          "<h1 class=\"grade\">" + grade + "</h1>" +
+          "<p class=\"lede\">" + note + "</p>" +
+          "<div class=\"result-stats\">" +
+          "<span class=\"chip gold\">Final score <b>" + S.score.toLocaleString("en-US") + "</b></span>" +
+          "<span class=\"chip\">First try accuracy <b>" + acc + "%</b></span>" +
+          "<span class=\"chip\">Best streak <b>" + S.bestStreak + "</b></span>" +
+          "<span class=\"chip\">Fees earned <b>" + money(S.fees) + "</b></span>" +
+          "<span class=\"chip\">Clients filed <b>" + S.order.length + " of " + S.order.length + "</b></span>" +
+          "</div>" +
+          "<div class=\"spotlight\">" +
+          "<span class=\"ad-kicker\">The next level · From Genextra LLC</span>" +
+          "<h2>Enjoying the game? You can do this for real.</h2>" +
+          "<p>You just trained the way real preparers learn: interview, documents, Form 1040, credits, verdict. The Tax Preparer Playbook takes you from training cases to a real tax preparation business, clients, fees, season workflow, and all.</p>" +
+          "<span class=\"price\">" + esc(pb.price) + "</span>" +
+          "<div class=\"row\"><a class=\"btn amber\" href=\"" + pb.url + "\" target=\"_blank\" rel=\"noopener\">Tax Preparer Playbook</a>" +
+          "<button class=\"btn ghost\" id=\"again\">Train again</button></div>" +
+          "</div>" +
+          "<h2 style=\"margin-top:30px; font-size:1.35rem;\">More from Genextra LLC</h2>" +
+          "<div class=\"product-grid\">" + grid + "</div>" +
+          "<div class=\"creator\">Created by <b>Genextra LLC</b> · Disclaimer: This simulation is based on tax year 2025 tax law. Tax laws change from year to year, so figures may differ in other years.</div>" +
+          "</div>";
+        document.getElementById("again").addEventListener("click", function () {
+          S = newState();
+          hud.classList.remove("hidden");
+          startClient();
+        });
+        window.scrollTo(0, 0);
+      }
+
+      startScreen();
+    </script>
+  </body>
+</html>
